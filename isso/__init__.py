@@ -89,7 +89,11 @@ class Isso(object):
         self.db = db.SQLite3(conf.get('general', 'dbpath'), conf)
         self.signer = URLSafeTimedSerializer(self.db.preferences.get("session-key"))
         self.markup = html.Markup(conf.section('markup'))
-        self.hasher = hash.new(conf.section("hash"))
+        class NoHash:
+            def __init__(self, *args, **kwargs): pass
+            def hash(self, *args, **kwargs): return ""
+            def uhash(self, *args, **kwargs): return ""
+        self.hasher = NoHash()
 
         super(Isso, self).__init__(conf)
 
