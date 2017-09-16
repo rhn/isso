@@ -93,10 +93,6 @@ class API(object):
         ('delete',  ('DELETE', '/id/<int:id>')),
         ('moderate',('GET',  '/id/<int:id>/<any(activate,delete):action>/<string:key>')),
         ('moderate',('POST', '/id/<int:id>/<any(activate,delete):action>/<string:key>')),
-        ('like',    ('POST', '/id/<int:id>/like')),
-        ('dislike', ('POST', '/id/<int:id>/dislike')),
-        ('demo',    ('GET', '/demo')),
-        ('preview', ('POST', '/preview'))
     ]
 
     def __init__(self, isso, hasher):
