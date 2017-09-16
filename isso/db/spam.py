@@ -37,18 +37,6 @@ class Guard:
             return False, "{0}: ratelimit exceeded ({1})".format(
                 comment["remote_addr"], ', '.join(Guard.ids(rv)))
 
-        # block more than three comments as direct response to the post
-        if comment["parent"] is None:
-            rv = self.db.execute([
-                'SELECT id FROM comments WHERE',
-                '    tid = (SELECT id FROM threads WHERE uri = ?)',
-                'AND remote_addr = ?',
-                'AND parent IS NULL;'
-            ], (uri, comment["remote_addr"])).fetchall()
-
-            if len(rv) >= self.conf.getint("direct-reply"):
-                return False, "%i direct responses to %s" % (len(rv), uri)
-
         # block replies to self unless :param:`reply-to-self` is enabled
         elif self.conf.getboolean("reply-to-self") == False:
             rv = self.db.execute([
