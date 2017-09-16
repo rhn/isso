@@ -190,7 +190,6 @@ def make_app(conf=None, threading=True, multiprocessing=False, uwsgi=False):
     wrapper.append(partial(SharedDataMiddleware, exports={
         '/js': join(dirname(__file__), 'js/'),
         '/css': join(dirname(__file__), 'css/'),
-        '/demo': join(dirname(__file__), 'demo/')
         }))
 
     wrapper.append(partial(wsgi.CORSMiddleware,
