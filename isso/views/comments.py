@@ -81,7 +81,7 @@ class API(object):
                   'mode', 'created', 'modified', 'likes', 'dislikes', 'hash'])
 
     # comment fields, that can be submitted
-    ACCEPT = set(['text', 'author', 'website', 'email', 'parent', 'title'])
+    ACCEPT = set(['text', 'author', 'website', 'email', 'parent', 'title', 'post_key'])
 
     VIEWS = [
         ('fetch',   ('GET', '/')),
@@ -105,6 +105,7 @@ class API(object):
         self.conf = isso.conf.section("general")
         self.moderated = isso.conf.getboolean("moderation", "enabled")
 
+        self.db = isso.db
         self.guard = isso.db.guard
         self.threads = isso.db.threads
         self.comments = isso.db.comments
@@ -115,7 +116,7 @@ class API(object):
 
     @classmethod
     def verify(cls, comment):
-
+        
         if "text" not in comment:
             return False, "text is missing"
 
@@ -217,10 +218,17 @@ class API(object):
     """
     @xhr
     @requires(str, 'uri')
-    def new(self, environ, request, uri):
-
+    @requires(str, 'key')
+    def new(self, environ, request, uri, key):
         data = request.get_json()
-
+        
+        # check access keys
+        rv = self.db.execute([
+            'SELECT uri FROM access WHERE key = ? ;'
+        ], (key,)).fetchall()
+        if not rv or rv[0][0] != uri:
+            raise Forbidden
+        
         for field in set(data.keys()) - API.ACCEPT:
             data.pop(field)
 

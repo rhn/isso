@@ -36,6 +36,10 @@ class SQLite3:
             "   WHERE type='table' AND name IN ('threads', 'comments', 'preferences')"]
         ).fetchone()
 
+        self.execute([
+            'CREATE TABLE IF NOT EXISTS access (',
+            '    id INTEGER PRIMARY KEY, uri VARCHAR(256) UNIQUE, key VARCHAR(256))']).fetchone()
+
         self.preferences = Preferences(self)
         self.threads = Threads(self)
         self.comments = Comments(self)

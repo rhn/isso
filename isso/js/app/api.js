@@ -2,17 +2,23 @@ define(["app/lib/promise", "app/globals"], function(Q, globals) {
 
     "use strict";
 
-    var salt = "Eech7co8Ohloopo9Ol6baimi",
-        location = window.location.pathname;
-
-    var script, endpoint,
+    var script, endpoint, post_key,
         js = document.getElementsByTagName("script");
-
+    
+    var salt = "Eech7co8Ohloopo9Ol6baimi",
+        real_location = window.location.pathname,
+        location = window.location.pathname;
+    
     // prefer `data-isso="//host/api/endpoint"` if provided
     for (var i = 0; i < js.length; i++) {
         if (js[i].hasAttribute("data-isso")) {
             endpoint = js[i].getAttribute("data-isso");
-            break;
+        }
+        if (js[i].hasAttribute("marginalia-ro-uri")) {
+            location = js[i].getAttribute("marginalia-ro-uri");
+        }
+        if (js[i].hasAttribute("marginalia-post-key")) {
+            post_key = js[i].getAttribute("marginalia-post-key");
         }
     }
 
@@ -91,7 +97,11 @@ define(["app/lib/promise", "app/globals"], function(Q, globals) {
 
     var create = function(tid, data) {
         var deferred = Q.defer();
-        curl("POST", endpoint + "/new?" + qs({uri: tid || location}), JSON.stringify(data),
+        var query = {uri: tid || location};
+        if (post_key) {
+            query["key"] = post_key;
+        }
+        curl("POST", endpoint + "/new?" + qs(query), JSON.stringify(data),
             function (rv) {
                 if (rv.status === 201 || rv.status === 202) {
                     deferred.resolve(JSON.parse(rv.body));
