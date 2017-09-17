@@ -164,19 +164,20 @@ define(["app/dom", "app/utils", "app/config", "app/api", "app/jade", "app/i18n",
             text   = $("#isso-" + comment.id + " > .text-wrapper > .text");
 
         var form = null;  // XXX: probably a good place for a closure
-        $("a.reply", footer).toggle("click",
-            function(toggler) {
-                form = footer.insertAfter(new Postbox(comment.parent === null ? comment.id : comment.parent));
-                form.onsuccess = function() { toggler.next(); };
-                $(".textarea", form).focus();
-                $("a.reply", footer).textContent = i18n.translate("comment-close");
-            },
-            function() {
-                form.remove();
-                $("a.reply", footer).textContent = i18n.translate("comment-reply");
-            }
-        );
-
+        if (!config.readonly) {
+            $("a.reply", footer).toggle("click",
+                function(toggler) {
+                    form = footer.insertAfter(new Postbox(comment.parent === null ? comment.id : comment.parent));
+                    form.onsuccess = function() { toggler.next(); };
+                    $(".textarea", form).focus();
+                    $("a.reply", footer).textContent = i18n.translate("comment-close");
+                },
+                function() {
+                    form.remove();
+                    $("a.reply", footer).textContent = i18n.translate("comment-reply");
+                }
+            );
+        }
         if (config.vote) {
             var voteLevels = config['vote-levels'];
             if (typeof voteLevels === 'string') {
@@ -225,108 +226,110 @@ define(["app/dom", "app/utils", "app/config", "app/api", "app/jade", "app/i18n",
             votes(comment.likes - comment.dislikes);
         }
 
-        $("a.edit", footer).toggle("click",
-            function(toggler) {
-                var edit = $("a.edit", footer);
-                var avatar = config["avatar"] ? $(".avatar", el, false)[0] : null;
+        if (!config.readonly) {
+            $("a.edit", footer).toggle("click",
+                function(toggler) {
+                    var edit = $("a.edit", footer);
+                    var avatar = config["avatar"] ? $(".avatar", el, false)[0] : null;
 
-                edit.textContent = i18n.translate("comment-save");
-                edit.insertAfter($.new("a.cancel", i18n.translate("comment-cancel"))).on("click", function() {
-                    toggler.canceled = true;
-                    toggler.next();
-                });
+                    edit.textContent = i18n.translate("comment-save");
+                    edit.insertAfter($.new("a.cancel", i18n.translate("comment-cancel"))).on("click", function() {
+                        toggler.canceled = true;
+                        toggler.next();
+                    });
 
-                toggler.canceled = false;
-                api.view(comment.id, 1).then(function(rv) {
-                    var textarea = lib.editorify($.new("div.textarea"));
+                    toggler.canceled = false;
+                    api.view(comment.id, 1).then(function(rv) {
+                        var textarea = lib.editorify($.new("div.textarea"));
 
-                    textarea.innerHTML = utils.detext(rv.text);
-                    textarea.focus();
-
-                    text.classList.remove("text");
-                    text.classList.add("textarea-wrapper");
-
-                    text.textContent = "";
-                    text.append(textarea);
-                });
-
-                if (avatar !== null) {
-                    avatar.hide();
-                }
-            },
-            function(toggler) {
-                var textarea = $(".textarea", text);
-                var avatar = config["avatar"] ? $(".avatar", el, false)[0] : null;
-
-                if (! toggler.canceled && textarea !== null) {
-                    if (utils.text(textarea.innerHTML).length < 3) {
+                        textarea.innerHTML = utils.detext(rv.text);
                         textarea.focus();
-                        toggler.wait();
-                        return;
+
+                        text.classList.remove("text");
+                        text.classList.add("textarea-wrapper");
+
+                        text.textContent = "";
+                        text.append(textarea);
+                    });
+
+                    if (avatar !== null) {
+                        avatar.hide();
+                    }
+                },
+                function(toggler) {
+                    var textarea = $(".textarea", text);
+                    var avatar = config["avatar"] ? $(".avatar", el, false)[0] : null;
+
+                    if (! toggler.canceled && textarea !== null) {
+                        if (utils.text(textarea.innerHTML).length < 3) {
+                            textarea.focus();
+                            toggler.wait();
+                            return;
+                        } else {
+                            api.modify(comment.id, {"text": utils.text(textarea.innerHTML)}).then(function(rv) {
+                                text.innerHTML = rv.text;
+                                comment.text = rv.text;
+                            });
+                        }
                     } else {
-                        api.modify(comment.id, {"text": utils.text(textarea.innerHTML)}).then(function(rv) {
-                            text.innerHTML = rv.text;
-                            comment.text = rv.text;
-                        });
+                        text.innerHTML = comment.text;
+                    }
+
+                    text.classList.remove("textarea-wrapper");
+                    text.classList.add("text");
+
+                    if (avatar !== null) {
+                        avatar.show();
+                    }
+
+                    $("a.cancel", footer).remove();
+                    $("a.edit", footer).textContent = i18n.translate("comment-edit");
+                }
+            );
+
+            $("a.delete", footer).toggle("click",
+                function(toggler) {
+                    var del = $("a.delete", footer);
+                    var state = ! toggler.state;
+
+                    del.textContent = i18n.translate("comment-confirm");
+                    del.on("mouseout", function() {
+                        del.textContent = i18n.translate("comment-delete");
+                        toggler.state = state;
+                        del.onmouseout = null;
+                    });
+                },
+                function() {
+                    var del = $("a.delete", footer);
+                    api.remove(comment.id).then(function(rv) {
+                        if (rv) {
+                            el.remove();
+                        } else {
+                            $("span.note", header).textContent = i18n.translate("comment-deleted");
+                            text.innerHTML = "<p>&nbsp;</p>";
+                            $("a.edit", footer).remove();
+                            $("a.delete", footer).remove();
+                        }
+                        del.textContent = i18n.translate("comment-delete");
+                    });
+                }
+            );
+
+            // remove edit and delete buttons when cookie is gone
+            var clear = function(button) {
+                if (! utils.cookie("isso-" + comment.id)) {
+                    if ($(button, footer) !== null) {
+                        $(button, footer).remove();
                     }
                 } else {
-                    text.innerHTML = comment.text;
+                    setTimeout(function() { clear(button); }, 15*1000);
                 }
+            };
 
-                text.classList.remove("textarea-wrapper");
-                text.classList.add("text");
-
-                if (avatar !== null) {
-                    avatar.show();
-                }
-
-                $("a.cancel", footer).remove();
-                $("a.edit", footer).textContent = i18n.translate("comment-edit");
-            }
-        );
-
-        $("a.delete", footer).toggle("click",
-            function(toggler) {
-                var del = $("a.delete", footer);
-                var state = ! toggler.state;
-
-                del.textContent = i18n.translate("comment-confirm");
-                del.on("mouseout", function() {
-                    del.textContent = i18n.translate("comment-delete");
-                    toggler.state = state;
-                    del.onmouseout = null;
-                });
-            },
-            function() {
-                var del = $("a.delete", footer);
-                api.remove(comment.id).then(function(rv) {
-                    if (rv) {
-                        el.remove();
-                    } else {
-                        $("span.note", header).textContent = i18n.translate("comment-deleted");
-                        text.innerHTML = "<p>&nbsp;</p>";
-                        $("a.edit", footer).remove();
-                        $("a.delete", footer).remove();
-                    }
-                    del.textContent = i18n.translate("comment-delete");
-                });
-            }
-        );
-
-        // remove edit and delete buttons when cookie is gone
-        var clear = function(button) {
-            if (! utils.cookie("isso-" + comment.id)) {
-                if ($(button, footer) !== null) {
-                    $(button, footer).remove();
-                }
-            } else {
-                setTimeout(function() { clear(button); }, 15*1000);
-            }
-        };
-
-        clear("a.edit");
-        clear("a.delete");
-
+            clear("a.edit");
+            clear("a.delete");
+        }
+        
         // show direct reply to own comment when cookie is max aged
         var show = function(el) {
             if (utils.cookie("isso-" + comment.id)) {
