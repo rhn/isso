@@ -50,12 +50,6 @@ class SQLite3:
         else:
             self.migrate(to=SQLite3.MAX_VERSION)
 
-        self.execute([
-            'CREATE TRIGGER IF NOT EXISTS remove_stale_threads',
-            'AFTER DELETE ON comments',
-            'BEGIN',
-            '    DELETE FROM threads WHERE id NOT IN (SELECT tid FROM comments);',
-            'END'])
 
     def execute(self, sql, args=()):
 
