@@ -695,9 +695,9 @@ class API(object):
                         return child['created']
                     return find_freshness(child)
 
-                return list(c for score, c
-                            in sorted((find_freshness(comment), comment)
-                                      for comment in comments))
+                return (c for score, c
+                        in sorted((find_freshness(comment), comment)
+                                  for comment in comments))
             else:
                 return comments
 
@@ -705,20 +705,21 @@ class API(object):
             'id'             : root_id,
             'total_replies'  : reply_counts[root_id], # direct replies!
             'hidden_replies' : reply_counts[root_id] - len(root_list),
-            'replies'        : self._process_fetched_list(root_list, plain)
+            'replies'        : list(self._process_fetched_list(do_sort(root_list), plain))
         }
 
 
         def fetch_replies(comment, level):
             args['parent'] = comment['id']
-            replies = list(self.comments.fetch(**args))
-            replies = self._process_fetched_list(replies, plain)
-            for reply in replies:
-                reply['replies'] = fetch_replies(reply, level + 1)
-            return replies
+            replies = do_sort(self.comments.fetch(**args))
+            comment['replies'] = list(self._process_fetched_list(replies, plain))
+            comment['total_replies'] = len(comment['replies'])
+            comment['hidden_replies'] = 0
+            for reply in comment['replies']:
+                fetch_replies(reply, level + 1)
 
         for comment in rv['replies']:
-            comment['replies'] = fetch_replies(comment, 0)
+            fetch_replies(comment, 0)
 
         return JSON(rv, 200)
 
@@ -737,11 +738,10 @@ class API(object):
             for key in set(item.keys()) - API.FIELDS:
                 item.pop(key)
 
-        if plain:
-            for item in fetched_list:
+            if plain:
                 item['text'] = self.isso.render(item['text'])
+            yield item
 
-        return fetched_list
 
     """
     @apiDefine likeResponse
