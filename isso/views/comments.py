@@ -550,6 +550,9 @@ class API(object):
 
         @apiParam {string} uri
             The URI of thread to get the comments from.
+        @apiParam {string} [order]
+            Specify order of returned comments: "new", "hot". "new" sorts newest comment first, regardless of child comments
+            Default: "new".
         @apiParam {number} [parent]
             Return only comments that are children of the comment with the provided ID.
         @apiUse plainParam
@@ -627,7 +630,6 @@ class API(object):
         """
     @requires(str, 'uri')
     def fetch(self, environ, request, uri):
-
         args = {
             'uri': uri,
             'after': request.args.get('after', 0)
@@ -654,12 +656,20 @@ class API(object):
 
         reply_counts = self.comments.reply_count(uri, after=args['after'])
 
+        order = request.args.get('order')
+        if not order:
+            order = "new"
+        if order not in ("hot", "new"):
+            return BadRequest('order should be "hot" or "new"')
+
         if args['limit'] == 0:
             root_list = []
         else:
             root_list = list(self.comments.fetch(**args))
             if not root_list:
                 raise NotFound
+        if order == 'new':
+            root_list = list(reversed(root_list))
 
         if root_id not in reply_counts:
             reply_counts[root_id] = 0
