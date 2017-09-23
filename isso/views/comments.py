@@ -665,11 +665,11 @@ class API(object):
         if args['limit'] == 0:
             root_list = []
         else:
+            if order == 'new':
+                args['order_by'] = 'created'
             root_list = list(self.comments.fetch(**args))
             if not root_list:
                 raise NotFound
-        if order == 'new':
-            root_list = list(reversed(root_list))
 
         if root_id not in reply_counts:
             reply_counts[root_id] = 0
