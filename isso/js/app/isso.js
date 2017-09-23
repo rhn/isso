@@ -167,7 +167,7 @@ define(["app/dom", "app/utils", "app/config", "app/api", "app/jade", "app/i18n",
         if (!config.readonly) {
             $("a.reply", footer).toggle("click",
                 function(toggler) {
-                    form = footer.insertAfter(new Postbox(comment.parent === null ? comment.id : comment.parent));
+                    form = footer.insertAfter(new Postbox(comment.id));
                     form.onsuccess = function() { toggler.next(); };
                     $(".textarea", form).focus();
                     $("a.reply", footer).textContent = i18n.translate("comment-close");
