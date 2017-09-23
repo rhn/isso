@@ -91,8 +91,6 @@ class API(object):
         ('view',    ('GET', '/id/<int:id>')),
         ('edit',    ('PUT', '/id/<int:id>')),
         ('delete',  ('DELETE', '/id/<int:id>')),
-        ('moderate',('GET',  '/id/<int:id>/<any(activate,delete):action>/<string:key>')),
-        ('moderate',('POST', '/id/<int:id>/<any(activate,delete):action>/<string:key>')),
     ]
 
     def __init__(self, isso, hasher):
