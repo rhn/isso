@@ -197,7 +197,7 @@ class Comments:
 
     def reply_count(self, url, mode=5, after=0):
         """
-        Return comment count for main thread and all reply threads for one url.
+        Return direct child comment count for main thread and all direct reply threads for one url.
         """
 
         sql = ['SELECT comments.parent,count(*)',

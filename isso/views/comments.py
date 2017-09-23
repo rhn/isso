@@ -654,22 +654,23 @@ class API(object):
 
         plain = request.args.get('plain', '0') == '0'
 
-        reply_counts = self.comments.reply_count(uri, after=args['after'])
-
         order = request.args.get('order')
         if not order:
             order = "new"
         if order not in ("hot", "new"):
             return BadRequest('order should be "hot" or "new"')
 
+        if order in ('hot', 'new'):
+            args['order_by'] = 'created'
+
         if args['limit'] == 0:
             root_list = []
         else:
-            if order == 'new':
-                args['order_by'] = 'created'
             root_list = list(self.comments.fetch(**args))
             if not root_list:
                 raise NotFound
+
+        reply_counts = self.comments.reply_count(uri, after=args['after'])
 
         if root_id not in reply_counts:
             reply_counts[root_id] = 0
@@ -681,33 +682,43 @@ class API(object):
         except ValueError:
             return BadRequest("nested_limit should be integer")
 
+        def do_sort(comments):
+            if order == "hot":
+                # root_list must be sorted by created
+                def find_freshness(comment):
+                    child = None
+                    for c in child['replies']:
+                        if c['parent'] == comment['id']:
+                            child = c
+                            break
+                    if child is None:
+                        return child['created']
+                    return find_freshness(child)
+
+                return list(c for score, c
+                            in sorted((find_freshness(comment), comment)
+                                      for comment in comments))
+            else:
+                return comments
+
         rv = {
             'id'             : root_id,
-            'total_replies'  : reply_counts[root_id],
+            'total_replies'  : reply_counts[root_id], # direct replies!
             'hidden_replies' : reply_counts[root_id] - len(root_list),
             'replies'        : self._process_fetched_list(root_list, plain)
         }
-        # We are only checking for one level deep comments
-        if root_id is None:
-            for comment in rv['replies']:
-                if comment['id'] in reply_counts:
-                    comment['total_replies'] = reply_counts[comment['id']]
-                    if nested_limit is not None:
-                        if nested_limit > 0:
-                            args['parent'] = comment['id']
-                            args['limit'] = nested_limit
-                            replies = list(self.comments.fetch(**args))
-                        else:
-                            replies = []
-                    else:
-                        args['parent'] = comment['id']
-                        replies = list(self.comments.fetch(**args))
-                else:
-                    comment['total_replies'] = 0
-                    replies = []
 
-                comment['hidden_replies'] = comment['total_replies'] - len(replies)
-                comment['replies'] = self._process_fetched_list(replies, plain)
+
+        def fetch_replies(comment, level):
+            args['parent'] = comment['id']
+            replies = list(self.comments.fetch(**args))
+            replies = self._process_fetched_list(replies, plain)
+            for reply in replies:
+                reply['replies'] = fetch_replies(reply, level + 1)
+            return replies
+
+        for comment in rv['replies']:
+            comment['replies'] = fetch_replies(comment, 0)
 
         return JSON(rv, 200)
 
