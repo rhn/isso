@@ -153,7 +153,7 @@ define(["app/dom", "app/utils", "app/config", "app/api", "app/jade", "app/i18n",
             entrypoint = $("#isso-" + comment.parent + " > .text-wrapper > .isso-follow-up");
         }
 
-        entrypoint.append(el);
+        entrypoint.prepend(el);
 
         if (scrollIntoView) {
             el.scrollIntoView();
