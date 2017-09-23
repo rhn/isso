@@ -155,9 +155,6 @@ define(["app/dom", "app/utils", "app/config", "app/api", "app/jade", "app/i18n",
 
         entrypoint.prepend(el);
 
-        if (scrollIntoView) {
-            el.scrollIntoView();
-        }
 
         var footer = $("#isso-" + comment.id + " > .text-wrapper > .isso-comment-footer"),
             header = $("#isso-" + comment.id + " > .text-wrapper > .isso-comment-header"),
@@ -328,21 +325,20 @@ define(["app/dom", "app/utils", "app/config", "app/api", "app/jade", "app/i18n",
 
             clear("a.edit");
             clear("a.delete");
-        }
-        
-        // show direct reply to own comment when cookie is max aged
-        var show = function(el) {
-            if (utils.cookie("isso-" + comment.id)) {
-                setTimeout(function() { show(el); }, 15*1000);
-            } else {
-                footer.append(el);
+            
+            // show direct reply to own comment when cookie is max aged
+            var show = function(el) {
+                if (utils.cookie("isso-" + comment.id)) {
+                    setTimeout(function() { show(el); }, 15*1000);
+                } else {
+                    footer.append(el);
+                }
+            };
+
+            if (! config["reply-to-self"] && utils.cookie("isso-" + comment.id)) {
+                show($("a.reply", footer).detach());
             }
-        };
-
-        if (! config["reply-to-self"] && utils.cookie("isso-" + comment.id)) {
-            show($("a.reply", footer).detach());
         }
-
         if(comment.hasOwnProperty('replies')) {
             var lastcreated = 0;
             comment.replies.forEach(function(replyObject) {
