@@ -11,24 +11,21 @@ if (3, 0) <= sys.version_info < (3, 3):
     raise SystemExit("Python 3.0, 3.1 and 3.2 are not supported")
 
 setup(
-    name='isso',
-    version='0.10.7.dev0',
-    author='Martin Zimmermann',
-    author_email='info@posativ.org',
+    name='Marginalia',
+    version='0.1',
+    author='rhn',
+    author_email='gihu.rhn@porcupinefactory.org',
     packages=find_packages(),
     include_package_data=True,
     zip_safe=False,
     url='https://github.com/posativ/isso/',
-    license='MIT',
-    description='lightweight Disqus alternative',
+    license='AGPL-3.0',
+    description='Book exchange platform',
     classifiers=[
-        "Development Status :: 4 - Beta",
+        "Development Status :: 3 - Alpha",
         "Topic :: Internet",
         "Topic :: Internet :: WWW/HTTP :: HTTP Servers",
         "Topic :: Internet :: WWW/HTTP :: WSGI :: Application",
-        "License :: OSI Approved :: MIT License",
-        "Programming Language :: Python :: 2.6",
-        "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: 3.3",
         "Programming Language :: Python :: 3.4"
     ],
