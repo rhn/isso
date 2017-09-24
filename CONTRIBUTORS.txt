@@ -1,3 +1,9 @@
+# Contributions to Marginalia
+
+## Creator & maintainer
+
+* rhn <gihu.rhn@porcupinefactory.org>
+
 # Contributions to Isso
 
 ## Creator & Maintainer

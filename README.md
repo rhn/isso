@@ -1,10 +1,26 @@
-Isso – a commenting server similar to Disqus
-============================================
+Marginalia
+==========
 
-Isso – *Ich schrei sonst* – is a lightweight commenting server written in
-Python and JavaScript. It aims to be a drop-in replacement for
-[Disqus](http://disqus.com).
+Marginalia is a book exchange & discussion website based on the premise that 
+you have to obtain the physical copy of the book to post.
 
-![Isso in Action](http://posativ.org/~tmp/isso-sample.png)
+Marginalia is based on [Isso](http://posativ.org/isso/).
 
-See [posativ.org/isso](http://posativ.org/isso/) for more details.
+Installation
+------------
+
+See Isso's documentation :)
+
+API
+---
+
+Marginalia introduces:
+
+- access keys found inside books
+- uri-independent thread IDs
+- thread and comment ranking
+
+License
+-------
+
+Marginalia is distributed under the terms of AGPL license. An exception is made to the Isso project, who can freely incorporate Marginalia's changes into their codebase.
