@@ -167,7 +167,24 @@ define(["app/lib/promise", "app/globals"], function(Q, globals) {
                 if (rv.status === 200) {
                     deferred.resolve(JSON.parse(rv.body));
                 } else if (rv.status === 404) {
-                    deferred.resolve({total_replies: 0});
+                    deferred.resolve({replies: []});
+                } else {
+                    deferred.reject(rv.body);
+                }
+            });
+        return deferred.promise;
+    };
+    
+    var threads = function() {
+        var query_dict = {};
+
+        var deferred = Q.defer();
+        curl("GET", endpoint + "/threads?" +
+            qs(query_dict), null, function(rv) {
+                if (rv.status === 200) {
+                    deferred.resolve(JSON.parse(rv.body));
+                } else if (rv.status === 404) {
+                    deferred.resolve([]);
                 } else {
                     deferred.reject(rv.body);
                 }
@@ -211,7 +228,7 @@ define(["app/lib/promise", "app/globals"], function(Q, globals) {
         view: view,
         fetch: fetch,
         count: count,
-        like: like,
-        dislike: dislike
+        
+        threads: threads,
     };
 });

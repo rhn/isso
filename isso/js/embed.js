@@ -3,7 +3,7 @@
  * Distributed under the MIT license
  */
 
-require(["app/lib/ready", "app/config", "app/i18n", "app/api", "app/isso", "app/count", "app/dom", "app/text/css", "app/text/svg", "app/jade"], function(domready, config, i18n, api, isso, count, $, css, svg, jade) {
+require(["app/lib/ready", "app/config", "app/i18n", "app/api", "app/isso", "app/marginalia", "app/count", "app/dom", "app/text/css", "app/text/svg", "app/jade"], function(domready, config, i18n, api, isso, marginalia, count, $, css, svg, jade) {
 
     "use strict";
 
@@ -12,16 +12,13 @@ require(["app/lib/ready", "app/config", "app/i18n", "app/api", "app/isso", "app/
     jade.set("pluralize", i18n.pluralize);
     jade.set("svg", svg);
 
-    domready(function() {
-
+    var thread = function() {
         if (config["css"]) {
             var style = $.new("style");
             style.type = "text/css";
             style.textContent = css.inline;
             $("head").append(style);
         }
-
-        count();
 
         if ($("#isso-thread") === null) {
             return console.log("abort, #isso-thread is missing");
@@ -37,21 +34,20 @@ require(["app/lib/ready", "app/config", "app/i18n", "app/api", "app/isso", "app/
             config["max-comments-top"],
             config["max-comments-nested"]).then(
             function(rv) {
-                if (rv.total_replies === 0) {
+                if (rv.replies.length == 0) {
                     $("#isso-thread > h4").textContent = i18n.translate("no-comments");
                     return;
                 }
 
                 var lastcreated = 0;
-                var count = rv.total_replies;
+                var count = rv.replies.length;
                 rv.replies.forEach(function(comment) {
                     isso.insert(comment, false);
                     if(comment.created > lastcreated) {
                         lastcreated = comment.created;
                     }
-                    count = count + comment.total_replies;
+                    count = count + comment.replies.length;
                 });
-                $("#isso-thread > h4").textContent = i18n.pluralize("num-comments", count);
 
                 if(rv.hidden_replies > 0) {
                     isso.insert_loader(rv, lastcreated);
@@ -65,5 +61,44 @@ require(["app/lib/ready", "app/config", "app/i18n", "app/api", "app/isso", "app/
                 console.log(err);
             }
         );
-    });
+    };
+    
+    var overview = function() {
+        if (config["css"]) {
+            var style = $.new("style");
+            style.type = "text/css";
+            style.textContent = css.inline;
+            $("head").append(style);
+        }
+        
+        if ($("#isso-overview") === null) {
+            return console.log("abort, #isso-overview is missing");
+        }
+        $("#isso-overview").append('<div id="isso-root"></div>');
+
+        api.threads().then(
+            function(rv) {
+                rv.threads.forEach(function(thread) {
+                    marginalia.insert(thread);
+                });
+
+                if(rv.hidden_threads > 0) {
+                    isso.insert_loader(rv, lastcreated);
+                }
+
+                if (window.location.hash.length > 0) {
+                    $(window.location.hash).scrollIntoView();
+                }
+            },
+            function(err) {
+                console.log(err);
+            }
+        );
+    };
+    
+    var program = thread;
+    if (config["overview"]) {
+        program = overview;
+    }
+    domready(program);
 });
