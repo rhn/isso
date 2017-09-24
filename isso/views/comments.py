@@ -686,7 +686,7 @@ class API(object):
 
         def do_sort(comments):
             if order == "hot":
-                # root_list must be sorted by created
+                # busted! needs to iterate the whole tree. duh
                 def find_freshness(comment):
                     child = None
                     for c in child['replies']:
@@ -858,8 +858,9 @@ class API(object):
 
         threads = list(self._threads.get_all())
         sorted_threads = list(sorted(((thread_freshness(t), t) for t in threads)))
-        return JSON([{
-                        "uri": thread["uri"],
-                        "title": thread["title"],
-                        "last_update_time": time
-                     } for (time, thread) in sorted_threads])
+        return JSON({"threads": [{
+                                    "uri": thread["uri"],
+                                    "title": thread["title"],
+                                    "last_update_time": time
+                                 } for (time, thread) in sorted_threads],
+                     "hidden_threads": 0})
