@@ -14,8 +14,8 @@ define(["app/lib/promise", "app/globals"], function(Q, globals) {
         if (js[i].hasAttribute("data-isso")) {
             endpoint = js[i].getAttribute("data-isso");
         }
-        if (js[i].hasAttribute("marginalia-ro-uri")) {
-            location = js[i].getAttribute("marginalia-ro-uri");
+        if (js[i].hasAttribute("marginalia-uri")) {
+            location = js[i].getAttribute("marginalia-uri");
         }
         if (js[i].hasAttribute("marginalia-post-key")) {
             post_key = js[i].getAttribute("marginalia-post-key");
