@@ -1,12 +1,12 @@
 define({
-    "postbox-text": "Type Comment Here (at least 3 chars)",
-    "postbox-author": "Name (optional)",
+    "postbox-text": "Type note here (at least 3 characters)",
+    "postbox-author": "Your name (optional)",
     "postbox-email": "E-mail (optional)",
     "postbox-website": "Website (optional)",
-    "postbox-submit": "Submit",
+    "postbox-submit": "Scribble",
 
-    "num-comments": "One Comment\n{{ n }} Comments",
-    "no-comments": "No Comments Yet",
+    "num-comments": "One note\n{{ n }} notes",
+    "no-comments": "No notes yet",
 
     "comment-reply": "Reply",
     "comment-edit": "Edit",
