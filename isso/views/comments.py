@@ -91,6 +91,8 @@ class API(object):
         ('view',    ('GET', '/id/<int:id>')),
         ('edit',    ('PUT', '/id/<int:id>')),
         ('delete',  ('DELETE', '/id/<int:id>')),
+        
+        ('threads', ('GET', '/threads')),
     ]
 
     def __init__(self, isso, hasher):
@@ -105,7 +107,7 @@ class API(object):
 
         self.db = isso.db
         self.guard = isso.db.guard
-        self.threads = isso.db.threads
+        self._threads = isso.db.threads
         self.comments = isso.db.comments
 
         for (view, (method, path)) in self.VIEWS:
@@ -248,7 +250,7 @@ class API(object):
         data['remote_addr'] = utils.anonymize(str(request.remote_addr))
 
         with self.isso.lock:
-            if uri not in self.threads:
+            if uri not in self._threads:
                 if 'title' not in data:
                     with http.curl('GET', local("origin"), uri) as resp:
                         if resp and resp.status == 200:
@@ -258,10 +260,10 @@ class API(object):
                 else:
                     title = data['title']
 
-                thread = self.threads.new(uri, title)
+                thread = self._threads.new(uri, title)
                 self.signal("comments.new:new-thread", thread)
             else:
-                thread = self.threads[uri]
+                thread = self._threads[uri]
 
         # notify extensions that the new comment is about to save
         self.signal("comments.new:before-save", thread, data)
@@ -845,3 +847,19 @@ class API(object):
 
     def demo(self, env, req):
         return redirect(get_current_url(env) + '/index.html')
+
+    def threads(self, environ, request):
+        def thread_freshness(thread):
+            comments = self.comments.fetch(thread['uri'], order_by="created")
+            comments = list(comments)
+            if not comments:
+                raise NotImplementedError
+            return max(comment['created'] for comment in comments)
+
+        threads = list(self._threads.get_all())
+        sorted_threads = list(sorted(((thread_freshness(t), t) for t in threads)))
+        return JSON([{
+                        "uri": thread["uri"],
+                        "title": thread["title"],
+                        "last_update_time": time
+                     } for (time, thread) in sorted_threads])
