@@ -5,8 +5,7 @@ define(["app/lib/promise", "app/globals"], function(Q, globals) {
     var script, endpoint, post_key,
         js = document.getElementsByTagName("script");
     
-    var salt = "Eech7co8Ohloopo9Ol6baimi",
-        real_location = window.location.pathname,
+    var real_location = window.location.pathname,
         location = window.location.pathname;
     
     // prefer `data-isso="//host/api/endpoint"` if provided
@@ -203,7 +202,22 @@ define(["app/lib/promise", "app/globals"], function(Q, globals) {
         });
         return deferred.promise;
     };
-
+    
+    var check_code = function(base_uri, code) {
+        var deferred = Q.defer();
+        var uri = base_uri + '/' + code
+        curl("GET", uri, null, function(rv) {
+            if (rv.status === 200) {
+                deferred.resolve(uri);
+            } else if (rv.status === 404) {
+                deferred.resolve(null);
+            } else {
+                deferred.reject(null);
+            }
+        });
+        return deferred.promise;
+    };
+    
     var like = function(id) {
         var deferred = Q.defer();
         curl("POST", endpoint + "/id/" + id + "/like", null,
@@ -220,7 +234,6 @@ define(["app/lib/promise", "app/globals"], function(Q, globals) {
 
     return {
         endpoint: endpoint,
-        salt: salt,
 
         create: create,
         modify: modify,
@@ -228,7 +241,8 @@ define(["app/lib/promise", "app/globals"], function(Q, globals) {
         view: view,
         fetch: fetch,
         count: count,
-        
+
+        check_code: check_code,
         threads: threads,
     };
 });

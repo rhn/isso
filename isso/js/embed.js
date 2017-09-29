@@ -25,7 +25,9 @@ require(["app/lib/ready", "app/config", "app/i18n", "app/api", "app/isso", "app/
         }
 
         $("#isso-thread").append($.new('h4'));
-        if (!config["readonly"]) {
+        if (config["readonly"]) {
+            $("#isso-thread").append(new isso.Codebox());
+        } else {
             $("#isso-thread").append(new isso.Postbox(null));
         }
         $("#isso-thread").append('<div id="isso-root"></div>');

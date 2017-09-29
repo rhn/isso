@@ -27,5 +27,11 @@ define({
     "date-week": "last week\n{{ n }} weeks ago",
     "date-month": "last month\n{{ n }} months ago",
     "date-year": "last year\n{{ n }} years ago",
+    
     "last-thread-update": "last update",
+    
+    "postcode-enter": "To scribble on the margin, enter the Book Code from the back cover insert and prove that you have the book.",
+    "post-code": "Book Code",
+    "codebox-activate": "I have the book!",
+    "postcode-bad": "Book Code incorrect."
 });

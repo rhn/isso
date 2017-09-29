@@ -87,6 +87,47 @@ define(["app/dom", "app/utils", "app/config", "app/api", "app/jade", "app/i18n",
         return el;
     };
 
+    var Codebox = function() {
+        var el = $.htmlify(jade.render("codebox", {}));
+
+        // callback on success (e.g. to toggle the reply button)
+        el.onsuccess = function(uri) {
+            window.location = uri;
+        };
+
+        el.validate = function() {
+            if ($("[name='code']", this).value.length <= 0)
+            {
+              $("[name='code']", this).focus();
+              return false;
+            }
+            return true;
+        };
+        // submit form, initialize optional fields with `null` and reset form.
+        // If replied to a comment, remove form completely.
+        $("[type=submit]", el).on("click", function() {
+            if (! el.validate()) {
+                return;
+            }
+
+            var code = $("[name=code]", el).value || null;
+
+            api.check_code(config["codes-root"], code
+            ).then(function(uri) {
+                var message = "";
+                if (uri === null) {
+                    message = i18n.translate("postcode-bad");
+                } else {
+                    el.onsuccess(uri);
+                }
+                var err = $("#isso-thread .isso-codebox .post-message > .text");
+                err.innerText = message;
+                err.textContent = message;
+            });
+        });
+        return el;
+    };
+
     var insert_loader = function(comment, lastcreated) {
         var entrypoint;
         if (comment.id === null) {
@@ -359,6 +400,7 @@ define(["app/dom", "app/utils", "app/config", "app/api", "app/jade", "app/i18n",
     return {
         insert: insert,
         insert_loader: insert_loader,
-        Postbox: Postbox
+        Postbox: Postbox,
+        Codebox: Codebox,
     };
 });
