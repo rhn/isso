@@ -26,7 +26,9 @@ require(["app/lib/ready", "app/config", "app/i18n", "app/api", "app/isso", "app/
 
         $("#isso-thread").append($.new('h4'));
         if (config["readonly"]) {
-            $("#isso-thread").append(new isso.Codebox());
+            var lines = {'enter': i18n.translate('postcode-enter'),
+                         'check': i18n.translate('codebox-activate')}
+            $("#isso-thread").append(new isso.Codebox(lines));
         } else {
             $("#isso-thread").append(new isso.Postbox(null));
         }
@@ -65,14 +67,18 @@ require(["app/lib/ready", "app/config", "app/i18n", "app/api", "app/isso", "app/
         );
     };
     
-    var overview = function() {
-        if (config["css"]) {
-            var style = $.new("style");
-            style.type = "text/css";
-            style.textContent = css.inline;
-            $("head").append(style);
+    var bookcode = function() {
+        if ($("#isso-code") === null) {
+            return console.log("abort, #isso-code is missing");
         }
-        
+        var lines = {enter: i18n.translate("bookcode-enter"),
+                     check: i18n.translate("bookcode-check")};
+        $("#isso-code").append(new isso.Codebox(lines));
+    };
+
+    
+    var overview = function() {
+        bookcode();        
         if ($("#isso-overview") === null) {
             return console.log("abort, #isso-overview is missing");
         }
@@ -97,7 +103,7 @@ require(["app/lib/ready", "app/config", "app/i18n", "app/api", "app/isso", "app/
             }
         );
     };
-    
+        
     var program = thread;
     if (config["overview"]) {
         program = overview;

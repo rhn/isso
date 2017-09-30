@@ -87,8 +87,8 @@ define(["app/dom", "app/utils", "app/config", "app/api", "app/jade", "app/i18n",
         return el;
     };
 
-    var Codebox = function() {
-        var el = $.htmlify(jade.render("codebox", {}));
+    var Codebox = function(lines) {
+        var el = $.htmlify(jade.render("codebox", lines));
 
         // callback on success (e.g. to toggle the reply button)
         el.onsuccess = function(uri) {
@@ -120,7 +120,7 @@ define(["app/dom", "app/utils", "app/config", "app/api", "app/jade", "app/i18n",
                 } else {
                     el.onsuccess(uri);
                 }
-                var err = $("#isso-thread .isso-codebox .post-message > .text");
+                var err = $(".isso-codebox .post-message > .text");
                 err.innerText = message;
                 err.textContent = message;
             });

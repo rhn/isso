@@ -31,7 +31,9 @@ define({
     "last-thread-update": "last update",
     
     "postcode-enter": "To scribble on the margin, enter the Book Code from the back cover insert and prove that you have the book.",
+    "bookcode-enter": "Do you have one of the books?",
     "post-code": "Book Code",
     "codebox-activate": "I have the book!",
-    "postcode-bad": "Book Code incorrect."
+    "bookcode-check": "Find the book",
+    "postcode-bad": "Sorry, the code you entered is incorrect."
 });

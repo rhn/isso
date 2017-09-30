@@ -1,9 +1,10 @@
 div(class='isso-codebox')
     div(class='form-wrapper')
-        =i18n('postcode-enter')
+        p(class='info')
+            = enter
         p(class='input-wrapper')
             input(type='text' name='code' placeholder=i18n('post-code'))
         p(class='post-action')
-            input(type='submit' value=i18n('codebox-activate'))
+            input(type='submit' value="#{check}")
         p(class='post-message')
             span(class='text')
