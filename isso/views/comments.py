@@ -77,11 +77,11 @@ def xhr(func):
 
 class API(object):
 
-    FIELDS = set(['id', 'parent', 'text', 'author', 'website',
+    FIELDS = set(['id', 'parent', 'text', 'author', 'place', 'website',
                   'mode', 'created', 'modified', 'likes', 'dislikes', 'hash'])
 
     # comment fields, that can be submitted
-    ACCEPT = set(['text', 'author', 'website', 'email', 'parent', 'title', 'post_key'])
+    ACCEPT = set(['text', 'author', 'website', 'place', 'parent', 'title', 'post_key'])
 
     VIEWS = [
         ('fetch',   ('GET', '/')),
@@ -123,7 +123,7 @@ class API(object):
         if not isinstance(comment.get("parent"), (int, type(None))):
             return False, "parent must be an integer or null"
 
-        for key in ("text", "author", "website", "email"):
+        for key in ("text", "author", "website"):
             if not isinstance(comment.get(key), (str, type(None))):
                 return False, "%s must be a string or null" % key
 
@@ -132,9 +132,6 @@ class API(object):
 
         if len(comment["text"]) > 65535:
             return False, "text is too long (maximum length: 65535)"
-
-        if len(comment.get("email") or "") > 254:
-            return False, "http://tools.ietf.org/html/rfc5321#section-4.5.3"
 
         if comment.get("website"):
             if len(comment["website"]) > 254:
@@ -232,49 +229,53 @@ class API(object):
         for field in set(data.keys()) - API.ACCEPT:
             data.pop(field)
 
-        for key in ("author", "email", "website", "parent"):
+        for key in ("author", "parent"):
             data.setdefault(key, None)
+
+        if data['parent'] is not None:
+            data.setdefault('place', None)
 
         valid, reason = API.verify(data)
         if not valid:
             return BadRequest(reason)
+        print(data)
+        escaped = dict((key, cgi.escape(value) if value is not None else None)
+                       for key, value in data.items())
 
-        for field in ("author", "email", "website"):
-            if data.get(field) is not None:
-                data[field] = cgi.escape(data[field])
+        added = {}
+        if escaped.get("website") is not None:
+            added["website"] = normalize(escaped["website"])
 
-        if data.get("website"):
-            data["website"] = normalize(data["website"])
+        added['mode'] = 2 if self.moderated else 1
 
-        data['mode'] = 2 if self.moderated else 1
-        data['remote_addr'] = utils.anonymize(str(request.remote_addr))
+        prepared = dict(escaped)
+        prepared.update(added)
 
         with self.isso.lock:
-            if uri not in self._threads:
-                if 'title' not in data:
+            if uri in self._threads:
+                thread = self._threads[uri]
+            else:
+                if 'title' in prepared:
+                    title = prepared['title']
+                else:
                     with http.curl('GET', local("origin"), uri) as resp:
                         if resp and resp.status == 200:
                             uri, title = parse.thread(resp.read(), id=uri)
                         else:
                             return NotFound('URI does not exist %s')
-                else:
-                    title = data['title']
 
                 thread = self._threads.new(uri, title)
                 self.signal("comments.new:new-thread", thread)
-            else:
-                thread = self._threads[uri]
-
         # notify extensions that the new comment is about to save
-        self.signal("comments.new:before-save", thread, data)
+        self.signal("comments.new:before-save", thread, prepared)
 
-        valid, reason = self.guard.validate(uri, data)
+        valid, reason = self.guard.validate(uri, prepared)
         if not valid:
             self.signal("comments.new:guard", reason)
             raise Forbidden(reason)
 
         with self.isso.lock:
-            rv = self.comments.add(uri, data)
+            rv = self.comments.add(uri, prepared)
 
         # notify extension, that the new comment has been successfully saved
         self.signal("comments.new:after-save", thread, rv)
@@ -284,9 +285,9 @@ class API(object):
             max_age=self.conf.getint('max-age'))
 
         rv["text"] = self.isso.render(rv["text"])
-        rv["hash"] = self.hash(rv['email'] or rv['remote_addr'])
+        rv["hash"] = self.hash(rv['remote_addr'])
 
-        self.cache.set('hash', (rv['email'] or rv['remote_addr']).encode('utf-8'), rv['hash'])
+        self.cache.set('hash', (rv['remote_addr']).encode('utf-8'), rv['hash'])
 
         for key in set(rv.keys()) - API.FIELDS:
             rv.pop(key)
@@ -727,16 +728,6 @@ class API(object):
 
     def _process_fetched_list(self, fetched_list, plain=False):
         for item in fetched_list:
-
-            key = item['email'] or item['remote_addr']
-            val = self.cache.get('hash', key.encode('utf-8'))
-
-            if val is None:
-                val = self.hash(key)
-                self.cache.set('hash', key.encode('utf-8'), val)
-
-            item['hash'] = val
-
             for key in set(item.keys()) - API.FIELDS:
                 item.pop(key)
 

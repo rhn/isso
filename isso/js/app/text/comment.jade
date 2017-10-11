@@ -1,18 +1,27 @@
-div(class='isso-comment' id='isso-#{comment.id}')
-    if conf.avatar
-        div(class='avatar')
-            svg(data-hash='#{comment.hash}')
+div(class='isso-comment #{bool(comment.parent) ? "entry" : "reply"}' id='isso-#{comment.id}')
     div(class='text-wrapper')
         div(class='isso-comment-header' role='meta')
-            if bool(comment.website)
-                a(class='author' href='#{comment.website}' rel='nofollow')
-                    = bool(comment.author) ? comment.author : i18n('comment-anonymous')
-            else
+            if bool(comment.parent)
                 span(class='author')
                     = bool(comment.author) ? comment.author : i18n('comment-anonymous')
-            span(class="spacer") &bull;
-            a(class='permalink' href='#isso-#{comment.id}')
-                time(title='#{humanize(comment.created)}' datetime='#{datetime(comment.created)}')
+                span(class="spacer") &bull;
+                a(class='permalink' href='#isso-#{comment.id}')
+                    time(class='relative' title='#{humanize(comment.created)}' datetime='#{datetime(comment.created)}')
+            else
+                span()
+                    = "Entry "
+                a(class='permalink' href='#isso-#{comment.id}')
+                    time(title='#{humanize(comment.created)}' datetime='#{datetime(comment.created)}')
+                        = human_abs(comment.created)
+                if bool(comment.place)
+                    span()
+                        = ". Place: "
+                    span(class='place')
+                        = comment.place
+                span()
+                    = ". By "
+                span(class='author')
+                    = bool(comment.author) ? comment.author : i18n('comment-anonymous')
             span(class='note')
                 = comment.mode == 2 ? i18n('comment-queued') : comment.mode == 4 ? i18n('comment-deleted') : ''
 

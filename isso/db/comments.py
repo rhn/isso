@@ -20,7 +20,7 @@ class Comments:
     """
 
     fields = ['tid', 'id', 'parent', 'created', 'modified', 'mode', 'remote_addr',
-              'text', 'author', 'email', 'website', 'likes', 'dislikes', 'voters']
+              'text', 'author', 'place', 'website', 'likes', 'dislikes', 'voters']
 
     def __init__(self, db):
 
@@ -29,7 +29,7 @@ class Comments:
             'CREATE TABLE IF NOT EXISTS comments (',
             '    tid REFERENCES threads(id), id INTEGER PRIMARY KEY, parent INTEGER,',
             '    created FLOAT NOT NULL, modified FLOAT, mode INTEGER, remote_addr VARCHAR,',
-            '    text VARCHAR, author VARCHAR, email VARCHAR, website VARCHAR,',
+            '    text VARCHAR, author VARCHAR, place VARCHAR, website VARCHAR,',
             '    likes INTEGER DEFAULT 0, dislikes INTEGER DEFAULT 0, voters BLOB NOT NULL);'])
 
     def add(self, uri, c):
@@ -42,7 +42,7 @@ class Comments:
             'INSERT INTO comments (',
             '    tid, parent,'
             '    created, modified, mode, remote_addr,',
-            '    text, author, email, website, voters )',
+            '    text, author, place, website, voters )',
             'SELECT',
             '    threads.id, ?,',
             '    ?, ?, ?, ?,',
@@ -50,7 +50,7 @@ class Comments:
             'FROM threads WHERE threads.uri = ?;'], (
             c.get('parent'),
             c.get('created') or time.time(), None, c["mode"], "",
-            c['text'], c.get('author'), c.get('email'), c.get('website'), b"",
+            c['text'], c.get('author'), c.get('place'), c.get('website'), b"",
             uri)
         )
 

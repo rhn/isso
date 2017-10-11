@@ -47,6 +47,13 @@ define(["libjs-jade-runtime", "app/utils", "jade!app/text/postbox", "jade!app/te
         ].join(":") + "Z";
     });
 
+    set("human_abs", function(date) {
+        if (typeof date !== "object") {
+            date = new Date(parseInt(date, 10) * 1000);
+        }
+        return date.toDateString();
+    });
+
     set("today", function() {
         return (new Date()).toDateString();
     });

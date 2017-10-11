@@ -30,12 +30,11 @@ class Guard:
 
         # block more than :param:`ratelimit` comments per minute
         rv = self.db.execute([
-            'SELECT id FROM comments WHERE remote_addr = ? AND ? - created < 60;'
-        ], (comment["remote_addr"], time.time())).fetchall()
+            'SELECT id FROM comments WHERE remote_addr = ? AND ? - created < 10;'
+        ], ("", time.time())).fetchall()
 
         if len(rv) >= self.conf.getint("ratelimit"):
-            return False, "{0}: ratelimit exceeded ({1})".format(
-                comment["remote_addr"], ', '.join(Guard.ids(rv)))
+            return False, "{0}: ratelimit exceeded ({1})".format(', '.join(Guard.ids(rv)))
 
         # block replies to self unless :param:`reply-to-self` is enabled
         elif self.conf.getboolean("reply-to-self") == False:
@@ -44,7 +43,7 @@ class Guard:
                 '    remote_addr = ?',
                 'AND id = ?',
                 'AND ? - created < ?'
-            ], (comment["remote_addr"], comment["parent"],
+            ], ("", comment["parent"],
                 time.time(), self.max_age)).fetchall()
 
             if len(rv) > 0:
