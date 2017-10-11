@@ -1,9 +1,12 @@
 define({
-    "postbox-text": "Type note here (at least 3 characters)",
-    "postbox-author": "Your name (optional)",
-    "postbox-email": "E-mail (optional)",
-    "postbox-website": "Website (optional)",
-    "postbox-submit": "Scribble",
+    "postbox-text": "I have finally received the book. This is what happened next...",
+    "postbox-place": "place",
+    "postbox-author": "name",
+    "postbox-submit": "Write",
+
+    "replybox-text": "Type comment here (at least 3 characters)",
+    "replybox-author": "Your name (optional)",
+    "replybox-submit": "Write",
 
     "num-comments": "One note\n{{ n }} notes",
     "no-comments": "No notes yet",
@@ -30,7 +33,7 @@ define({
     
     "last-thread-update": "last update",
     
-    "postcode-enter": "To scribble on the margin, enter the Book Code from the back cover insert and prove that you have the book.",
+    "postcode-enter": "To write or reply, enter the Book Code from the back cover insert and prove that you have the book.",
     "bookcode-enter": "Do you have one of the books?",
     "post-code": "Book Code",
     "codebox-activate": "I have the book!",

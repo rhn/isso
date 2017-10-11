@@ -8,6 +8,7 @@ define(["app/dom", "app/i18n"], function($, i18n) {
 
         el.on("focus", function() {
             if (el.classList.contains("placeholder")) {
+                el.textContentSaved = el.textContent;
                 el.innerHTML = "";
                 el.classList.remove("placeholder");
             }
@@ -15,7 +16,7 @@ define(["app/dom", "app/i18n"], function($, i18n) {
 
         el.on("blur", function() {
             if (el.textContent.length === 0) {
-                el.textContent = i18n.translate("postbox-text");
+                el.textContent = el.textContentSaved;
                 el.classList.add("placeholder");
             }
         });

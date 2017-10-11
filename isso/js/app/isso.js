@@ -6,12 +6,13 @@ define(["app/dom", "app/utils", "app/config", "app/api", "app/jade", "app/i18n",
     "use strict";
 
     var Postbox = function(parent) {
-
+        var boxkind = "replybox";
+        if (parent === null) {
+            boxkind = "postbox";
+        }
         var localStorage = utils.localStorageImpl,
-            el = $.htmlify(jade.render("postbox", {
+            el = $.htmlify(jade.render(boxkind, {
             "author":  JSON.parse(localStorage.getItem("author")),
-            "email":   JSON.parse(localStorage.getItem("email")),
-            "website": JSON.parse(localStorage.getItem("website"))
         }));
 
         // callback on success (e.g. to toggle the reply button)
@@ -24,33 +25,8 @@ define(["app/dom", "app/utils", "app/config", "app/api", "app/jade", "app/i18n",
                 $(".textarea", this).focus();
                 return false;
             }
-            if (config["require-email"] &&
-                $("[name='email']", this).value.length <= 0)
-            {
-              $("[name='email']", this).focus();
-              return false;
-            }
-            if (config["require-author"] &&
-                $("[name='author']", this).value.length <= 0)
-            {
-              $("[name='author']", this).focus();
-              return false;
-            }
             return true;
         };
-
-        // email is not optional if this config parameter is set
-        if (config["require-email"]) {
-            $("[name='email']", el).setAttribute("placeholder",
-                $("[name='email']", el).getAttribute("placeholder").replace(/ \(.*\)/, ""));
-        }
-
-        // author is not optional if this config parameter is set
-        if (config["require-author"]) {
-          $("[name='author']", el).placeholder =
-            $("[name='author']", el).placeholder.replace(/ \(.*\)/, "");
-        }
-
         // submit form, initialize optional fields with `null` and reset form.
         // If replied to a comment, remove form completely.
         $("[type=submit]", el).on("click", function() {
@@ -58,20 +34,19 @@ define(["app/dom", "app/utils", "app/config", "app/api", "app/jade", "app/i18n",
                 return;
             }
 
-            var author = $("[name=author]", el).value || null,
-                email = $("[name=email]", el).value || null,
-                website = $("[name=website]", el).value || null;
-
+            var author = $("[name=author]", el).value || null;
             localStorage.setItem("author", JSON.stringify(author));
-            localStorage.setItem("email", JSON.stringify(email));
-            localStorage.setItem("website", JSON.stringify(website));
-
-            api.create($("#isso-thread").getAttribute("data-isso-id"), {
-                author: author, email: email, website: website,
+            var params = {
+                author: author,
                 text: utils.text($(".textarea", el).innerHTML),
                 parent: parent || null,
                 title: $("#isso-thread").getAttribute("data-title") || null
-            }).then(function(comment) {
+            }
+            
+            if (parent === null) {
+                params["place"] = $("[name=place]", el).value || null;
+            }
+            api.create($("#isso-thread").getAttribute("data-isso-id"), params).then(function(comment) {
                 $(".textarea", el).innerHTML = "";
                 $(".textarea", el).blur();
                 insert(comment, true);

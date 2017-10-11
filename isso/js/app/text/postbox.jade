@@ -1,9 +1,18 @@
 div(class='isso-postbox')
     div(class='form-wrapper')
+        section(class='meta-section')
+            p(class='input-wrapper')
+                time(datetime='#{datetime(new Date())}')
+                    = today()
+                span()
+                    = ", in"
+                input(type='text' name='place' placeholder=i18n('postbox-place'))
         div(class='textarea-wrapper')
             div(class='textarea placeholder' contenteditable='true')
                 = i18n('postbox-text')
         section(class='auth-section')
+            span()
+                = "Signed,"
             p(class='input-wrapper')
                 input(type='text' name='author' placeholder=i18n('postbox-author')
                       value=author !== null ? '#{author}' : '')

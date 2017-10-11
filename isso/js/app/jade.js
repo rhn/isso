@@ -1,4 +1,4 @@
-define(["libjs-jade-runtime", "app/utils", "jade!app/text/postbox", "jade!app/text/codebox", "jade!app/text/comment", "jade!app/text/thread", "jade!app/text/comment-loader"], function(runtime, utils, tt_postbox, tt_codebox, tt_comment, tt_thread, tt_comment_loader) {
+define(["libjs-jade-runtime", "app/utils", "jade!app/text/postbox", "jade!app/text/replybox", "jade!app/text/codebox", "jade!app/text/comment", "jade!app/text/thread", "jade!app/text/comment-loader"], function(runtime, utils, tt_postbox, tt_replybox, tt_codebox, tt_comment, tt_thread, tt_comment_loader) {
     "use strict";
 
     var globals = {},
@@ -17,6 +17,7 @@ define(["libjs-jade-runtime", "app/utils", "jade!app/text/postbox", "jade!app/te
     };
 
     load("postbox", tt_postbox);
+    load("replybox", tt_replybox);
     load("codebox", tt_codebox);
     load("comment", tt_comment);
     load("thread", tt_thread);
@@ -44,6 +45,10 @@ define(["libjs-jade-runtime", "app/utils", "jade!app/text/postbox", "jade!app/te
             utils.pad(date.getUTCMinutes(), 2),
             utils.pad(date.getUTCSeconds(), 2)
         ].join(":") + "Z";
+    });
+
+    set("today", function() {
+        return (new Date()).toDateString();
     });
 
     return {
