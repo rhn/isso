@@ -170,16 +170,6 @@ def make_app(conf=None, threading=True, multiprocessing=False, uwsgi=False):
 
     isso = App(conf)
 
-    # check HTTP server connection
-    for host in conf.getiter("general", "host"):
-        with http.curl('HEAD', host, '/', 5) as resp:
-            if resp is not None:
-                logger.info("connected to %s", host)
-            else:
-                logger.warn("unable to connect to your website, Isso will probably not "
-                            "work correctly. Please make sure, Isso can reach your "
-                            "website via HTTP(S).")
-
     wrapper = [local_manager.make_middleware]
 
     if isso.conf.getboolean("server", "profile"):
