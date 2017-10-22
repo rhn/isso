@@ -84,7 +84,6 @@ def origin(hosts):
     hosts = [urlsplit(h) for h in hosts]
 
     def func(environ):
-
         if not hosts:
             return "http://invalid.local"
 
@@ -135,6 +134,7 @@ class CORSMiddleware(object):
         def add_cors_headers(status, headers, exc_info=None):
             headers = Headers(headers)
             headers.add("Access-Control-Allow-Origin", self.origin(environ))
+            headers.add("Vary", "Origin")
             headers.add("Access-Control-Allow-Credentials", "true")
             headers.add("Access-Control-Allow-Methods", ", ".join(self.methods))
             if self.allowed:

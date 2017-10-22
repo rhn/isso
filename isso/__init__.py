@@ -175,11 +175,10 @@ def make_app(conf=None, threading=True, multiprocessing=False, uwsgi=False):
         with http.curl('HEAD', host, '/', 5) as resp:
             if resp is not None:
                 logger.info("connected to %s", host)
-                break
-    else:
-        logger.warn("unable to connect to your website, Isso will probably not "
-                    "work correctly. Please make sure, Isso can reach your "
-                    "website via HTTP(S).")
+            else:
+                logger.warn("unable to connect to your website, Isso will probably not "
+                            "work correctly. Please make sure, Isso can reach your "
+                            "website via HTTP(S).")
 
     wrapper = [local_manager.make_middleware]
 
