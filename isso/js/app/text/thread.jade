@@ -1,10 +1,8 @@
-div(class='isso-thread')
-    div(class='text-wrapper')
-        div(class='isso-thread-header' role='meta')
-            a(class='thread' href='/book/#{thread.uri}' rel='nofollow')
-                = bool(thread.title) ? thread.title : 'no title'
-            span(class="spacer") &bull;
-            span(class="meta")
-                = i18n('last-thread-update')
-                time(title='#{humanize(thread.last_update_time)}' datetime='#{datetime(thread.last_update_time)}')
+li(class='isso-thread')
+    h2()
+        a(class='thread' href='/book/#{thread.uri}' rel='nofollow')
+            = thread.title
+    span(class="meta")
+        = i18n('last-thread-update')
+        time(title='#{humanize(thread.last_update_time)}' datetime='#{datetime(thread.last_update_time)}')
 
