@@ -1,10 +1,13 @@
+#! /usr/bin/python3
 import os.path
 import itertools
+from collections import ChainMap
 
 import CommonMark
 import yaml
+
 from jinja2 import Template
-from jinja2 import Environment, FileSystemLoader
+from jinja2 import Environment, FileSystemLoader, StrictUndefined
 
 
 def split_content(text):
@@ -31,8 +34,9 @@ def parse_content(text):
 def make_index(config, env, text):
     template = env.get_template('index.html')
     meta, content = parse_content(open(text).read())
-    return template.render({'meta': meta,
-                            'content': content})
+    return template.render(ChainMap({'meta': meta,
+                                     'content': content},
+                                    config))
 
 
 def generate(srcpath, dstpath):
@@ -40,7 +44,8 @@ def generate(srcpath, dstpath):
     env = Environment(
         loader=FileSystemLoader(templates),
         autoescape=True,
-        extensions=['jinja2.ext.autoescape']
+        extensions=['jinja2.ext.autoescape'],
+        undefined=StrictUndefined
     )
     config = yaml.load(open(os.path.join(srcpath, 'config.yaml')).read())
     contents = os.path.join(srcpath, 'contents')
