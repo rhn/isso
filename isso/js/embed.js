@@ -78,7 +78,6 @@ require(["app/lib/ready", "app/config", "app/i18n", "app/api", "app/isso", "app/
 
     
     var overview = function() {
-        bookcode();        
         if ($("#isso-overview") === null) {
             return console.log("abort, #isso-overview is missing");
         }
@@ -104,9 +103,13 @@ require(["app/lib/ready", "app/config", "app/i18n", "app/api", "app/isso", "app/
         );
     };
         
-    var program = thread;
     if (config["overview"]) {
-        program = overview;
+        domready(overview);
     }
-    domready(program);
+    if (config["bookcode"]) {
+        domready(bookcode);
+    }
+    if (config["thread"]) {
+        domready(thread);
+    }
 });
