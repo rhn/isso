@@ -30,9 +30,9 @@ def parse_content(text):
     return meta, content_html
 
 
-# take doc name and derive from there
-def make_index(config, env, text):
-    template = env.get_template('index.html')
+def make_page(config, env, text, template_filename):
+    """take doc name and derive from there"""
+    template = env.get_template(template_filename)
     meta, content = parse_content(open(text).read())
     return template.render(ChainMap({'meta': meta,
                                      'content': content},
@@ -49,9 +49,26 @@ def generate(srcpath, dstpath):
     )
     config = yaml.load(open(os.path.join(srcpath, 'config.yaml')).read())
     contents = os.path.join(srcpath, 'contents')
-    indexpage = make_index(config, env, os.path.join(contents, 'index.md'))
-    with open(os.path.join(dstpath, 'index.html'), 'w') as f:
-        f.write(indexpage)
+    templates = os.path.join(srcpath, 'templates')
+
+    for root, dirs, files in os.walk(contents):
+        relroot = os.path.relpath(root, contents)
+        dstroot = os.path.join(dstpath, relroot)
+
+        for dirname in dirs:
+            os.makedirs(os.path.join(dstroot, dirname), exist_ok=True)
+
+        for fname in files:
+            name = os.path.splitext(fname)[0]
+            templ_name = name + '.html'
+            page = make_page(config, env, os.path.join(root, fname), templ_name)
+            if templ_name == "index.html":
+                dest_name = templ_name
+            else:
+                os.makedirs(os.path.join(dstroot, name), exist_ok=True)
+                dest_name = os.path.join(name, 'index.html')
+            with open(os.path.join(dstroot, dest_name), 'w') as f:
+                f.write(page)
 
 
 if __name__ == '__main__':
