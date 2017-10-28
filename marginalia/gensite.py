@@ -74,6 +74,6 @@ def generate(srcpath, dstpath):
 if __name__ == '__main__':
     import argparse
     parser = argparse.ArgumentParser()
-    parser.add_argument("destpath")
+    parser.add_argument("sourcepath")
     args = parser.parse_args()
-    generate('.', args.destpath)
+    generate(args.sourcepath, '.')
