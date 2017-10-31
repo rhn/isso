@@ -1,11 +1,11 @@
 # -*- encoding: utf-8 -*-
 
 
-def Thread(id, uri, title):
+def Thread(id, uri, title, *args):
     return {
         "id": id,
         "uri": uri,
-        "title": title
+        "title": title,
     }
 
 

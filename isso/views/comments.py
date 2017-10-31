@@ -238,7 +238,7 @@ class API(object):
         valid, reason = API.verify(data)
         if not valid:
             return BadRequest(reason)
-        print(data)
+
         escaped = dict((key, cgi.escape(value) if value is not None else None)
                        for key, value in data.items())
 
@@ -844,7 +844,13 @@ class API(object):
             comments = self.comments.fetch(thread['uri'], order_by="created")
             comments = list(comments)
             if not comments:
-                raise NotImplementedError
+                from isso.db import schema
+                with schema.session(self.isso.conf.get('general', 'dbpath')) as session:
+                    posted = session.query(schema.Thread) \
+                                    .filter(schema.Thread.uri == thread['uri']) \
+                                    .one() \
+                                    .date_added
+                return time.mktime(posted.timetuple())
             return max(comment['created'] for comment in comments)
 
         threads = list(self._threads.get_all())

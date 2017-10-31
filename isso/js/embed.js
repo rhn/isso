@@ -13,15 +13,14 @@ require(["app/lib/ready", "app/config", "app/i18n", "app/api", "app/isso", "app/
     jade.set("svg", svg);
 
     var thread = function() {
+        if ($("#isso-thread") === null) {
+            return;
+        }
         if (config["css"]) {
             var style = $.new("style");
             style.type = "text/css";
             style.textContent = css.inline;
             $("head").append(style);
-        }
-
-        if ($("#isso-thread") === null) {
-            return console.log("abort, #isso-thread is missing");
         }
 
         $("#isso-thread").append($.new('h4'));
@@ -69,7 +68,7 @@ require(["app/lib/ready", "app/config", "app/i18n", "app/api", "app/isso", "app/
     
     var bookcode = function() {
         if ($("#isso-code") === null) {
-            return console.log("abort, #isso-code is missing");
+            return;
         }
         var lines = {enter: i18n.translate("bookcode-enter"),
                      check: i18n.translate("bookcode-check")};
@@ -79,7 +78,7 @@ require(["app/lib/ready", "app/config", "app/i18n", "app/api", "app/isso", "app/
     
     var overview = function() {
         if ($("#isso-overview") === null) {
-            return console.log("abort, #isso-overview is missing");
+            return;
         }
         $("#isso-overview").append('<div id="isso-root"></div>');
 
@@ -103,13 +102,7 @@ require(["app/lib/ready", "app/config", "app/i18n", "app/api", "app/isso", "app/
         );
     };
         
-    if (config["overview"]) {
-        domready(overview);
-    }
-    if (config["bookcode"]) {
-        domready(bookcode);
-    }
-    if (config["thread"]) {
-        domready(thread);
-    }
+    domready(overview);
+    domready(bookcode);
+    domready(thread);
 });

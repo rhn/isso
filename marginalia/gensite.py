@@ -4,12 +4,59 @@ from pathlib import Path
 import itertools
 from collections import ChainMap
 import warnings
+from contextlib import contextmanager
+import random
+random.seed()
+import string
+from datetime import date, datetime
 
 import CommonMark
 import yaml
 
 from jinja2 import Template
 from jinja2 import Environment, FileSystemLoader, StrictUndefined
+
+from sqlalchemy import Column, DateTime, String, Integer, ForeignKey, Date
+from sqlalchemy.orm import relationship, backref
+from sqlalchemy.ext.declarative import declarative_base
+ 
+ 
+Base = declarative_base()
+# TODO: move to core
+# TODO: migration with alembic
+
+class Thread(Base):
+    __tablename__ = 'threads'
+    id = Column(Integer, primary_key=True)
+    uri = Column(String, unique=True)
+    title = Column(String)
+    date_added = Column(Date)
+# TODO: add metadata from template file
+
+
+class Access(Base):
+    __tablename__ = 'access'
+    id = Column(Integer, primary_key=True)
+    uri = Column(String, unique=True)
+    key = Column(String)
+
+
+@contextmanager
+def open_db(path):
+    from sqlalchemy import create_engine
+    engine = create_engine('sqlite:///{}'.format(path))
+     
+    from sqlalchemy.orm import sessionmaker
+    session = sessionmaker()
+    session.configure(bind=engine)
+    Base.metadata.create_all(engine)
+    s = session()
+    yield s
+    s.commit()
+
+
+def make_token(n):
+    return ''.join(random.choice(string.ascii_letters + string.digits) for i in range(n))
 
 
 def split_content(text):
@@ -42,10 +89,30 @@ def make_page(config, env, text, template_filename):
                                     config))
 
 
-def update_entry(config, book_path):
-    print("FIXME: add to db")
-    return {"number": -1,
-            "photos": []}
+def update_entry(config, book_slug, book_path):
+    """Check if book exists, and add to database"""
+    contents_path = book_path.joinpath("index.md")
+    meta, content = parse_content(contents_path.read_text())
+
+    with open_db(config["db_path"]) as session:
+        thread = session.query(Thread).filter(Thread.uri == book_slug).one_or_none()
+        if thread is None:
+            thread = Thread(title=meta['title'],
+                            uri=book_slug,
+                            date_added=meta['date'])
+            session.add(thread)
+        access = session.query(Access).filter(Access.uri == book_slug).one_or_none()
+        if access is None:
+            access = Access(uri=book_slug, key=make_token(8))
+            session.add(access)
+            print("Key for {} is {}".format(thread.title, access.key))
+        session.commit()    
+        
+        return {"number": access.id,
+                "code": access.key,
+                "slug": book_slug,
+                "photos": []}
+
 
 def generate(srcpath, dstpath):
     templates = os.path.join(srcpath, 'templates')
@@ -88,14 +155,22 @@ def generate(srcpath, dstpath):
         name_slug = d.name
         dstdir = Path(dstroot, config["book_path"], name_slug)
         dstdir.mkdir(exist_ok=True)
-        meta = update_entry(config, dstdir)
-        book_config = ChainMap({"journal": meta}, config)
 
+        meta = update_entry(config, name_slug, d)
+
+        postdir = Path(dstroot, config["post_path"], meta['code'])
+        postdir.parent.mkdir(exist_ok=True)
+        postdir.mkdir(exist_ok=True)
+
+        book_config = ChainMap({"journal": meta}, config)
+        
         for fpath in d.iterdir():
             name = fpath.stem
-            
             page = make_page(book_config, env, fpath, 'journal.html')
             dstdir.joinpath(name + '.html').write_text(page)
+            
+            page = make_page(book_config, env, fpath, 'journal_post.html')
+            postdir.joinpath(name + '.html').write_text(page)
 
 
 if __name__ == '__main__':
