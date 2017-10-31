@@ -1,0 +1,5 @@
+script_url: "127.0.0.1:8080"
+api_url: "127.0.0.1:8080"
+site_url: "127.0.0.2:8000"
+book_path: "book"
+db_path: "../comments.db"

@@ -1,0 +1,40 @@
+{% extends "page.html" %}
+{% block title %}
+    Journal of {{ meta.title }}
+{% endblock title %}
+{% block main %}
+  <article>
+    <h1>Book #{{ journal.number }}: {{ meta.title }}</h1>
+    <aside>
+      <p>With Marginalia since {{ meta.date }}, with the number #{{ journal.number }}.</p>
+      {% if meta.donor is defined %}
+          <p>Generously donated by {{ meta.donor }}.</p>
+      {% else %}
+          <p>Donated anonymously</p>
+      {% endif %}
+    </aside>
+    <section>
+      {% for photo in journal.photos %}
+        <figure>
+            <img src="{{ photo.url }}" alt="{{ photo.name }}" />
+            <figcaption>{{ photo.name }}</figcaption>
+        </figure>
+      {% endfor %}
+    </section>
+    <section>
+        {% autoescape false %}
+          {{ content }}
+        {% endautoescape %}
+    </section>
+  </article>
+  <script src="//{{ script_url }}/js/config.js"></script>
+  <script data-main="//{{ script_url }}/js/embed"
+          data-isso="//{{ api_url }}/"
+          data-isso-thread="true"
+          data-isso-bookcode="true"
+          data-isso-readonly="true"
+          data-isso-codes-root="//{{ site_url }}/bookcodes/"
+          src="//{{ script_url }}/js/components/requirejs/require.js">
+  </script>
+  <div id="isso-thread"></div>
+{% endblock main %}
