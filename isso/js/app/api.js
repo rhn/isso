@@ -234,6 +234,7 @@ define(["app/lib/promise", "app/globals"], function(Q, globals) {
 
     return {
         endpoint: endpoint,
+        location: location,
 
         create: create,
         modify: modify,

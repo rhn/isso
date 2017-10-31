@@ -5,12 +5,12 @@ div(class='isso-comment #{bool(comment.parent) ? "entry" : "reply"}' id='isso-#{
                 span(class='author')
                     = bool(comment.author) ? comment.author : i18n('comment-anonymous')
                 span(class="spacer") &bull;
-                a(class='permalink' href='#isso-#{comment.id}')
+                a(class='permalink' href='#{thread_uri}/#isso-#{comment.id}')
                     time(class='relative' title='#{humanize(comment.created)}' datetime='#{datetime(comment.created)}')
             else
                 span()
                     = "Entry "
-                a(class='permalink' href='#isso-#{comment.id}')
+                a(class='permalink' href='#{thread_uri}/#isso-#{comment.id}')
                     time(title='#{humanize(comment.created)}' datetime='#{datetime(comment.created)}')
                         = human_abs(comment.created)
                 if bool(comment.place)

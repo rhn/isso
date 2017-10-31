@@ -3,12 +3,11 @@
     <script data-main="//{{ script_url }}/js/embed"
             data-isso="//{{ api_url }}/"
             data-isso-max-comments-nested="10"
-            data-isso-thread="true"
             data-isso-avatar="false"
             data-isso-vote="false"
             marginalia-uri="{{ journal.slug }}"
-            data-isso-bookcode="true"
             marginalia-post-key="{{ journal.code }}"
+            data-isso-threads-root="//{{ site_url }}/{{ book_path}}/"
             data-isso-codes-root="//{{ site_url }}/{{ post_path }}/"
             src="//{{ script_url }}/js/components/requirejs/require.js">
     </script>
