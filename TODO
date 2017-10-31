@@ -1,0 +1,10 @@
+TODO list
+=========
+
+- fix permalinks to not include the key
+- finish site generator
+- create label generator
+- copy metadata to database
+- expose metadata via API
+- update requirements
+- disallow html in comments
