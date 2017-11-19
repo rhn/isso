@@ -145,9 +145,11 @@ define(["app/dom", "app/utils", "app/config", "app/api", "app/jade", "app/i18n",
         });
     };
 
-    var insert = function(comment, scrollIntoView) {
-        var el = $.htmlify(jade.render("comment", {"comment": comment,
-                                                   "thread_uri": config["threads-root"] + api.location}));
+    var insert = function(comment, scrollIntoView, thread_added) {
+        var el = $.htmlify(jade.render("comment", {
+            "comment": comment,
+            "thread_uri": config["threads-root"] + api.location,
+            "thread_added": thread_added}));
 
         // update datetime every 60 seconds
         var refresh = function() {

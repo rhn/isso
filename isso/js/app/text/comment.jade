@@ -1,6 +1,6 @@
 div(class='isso-comment #{bool(comment.parent) ? "entry" : "reply"}' id='isso-#{comment.id}')
     div(class='text-wrapper')
-        div(class='isso-comment-header' role='meta')
+        h2(class='isso-comment-header' role='meta')
             if bool(comment.parent)
                 span(class='author')
                     = bool(comment.author) ? comment.author : i18n('comment-anonymous')
@@ -9,17 +9,17 @@ div(class='isso-comment #{bool(comment.parent) ? "entry" : "reply"}' id='isso-#{
                     time(class='relative' title='#{humanize(comment.created)}' datetime='#{datetime(comment.created)}')
             else
                 span()
-                    = "Entry "
+                    = "On "
                 a(class='permalink' href='#{thread_uri}/#isso-#{comment.id}')
                     time(title='#{humanize(comment.created)}' datetime='#{datetime(comment.created)}')
-                        = human_abs(comment.created)
+                        = days_rel(comment.created, thread_added)
                 if bool(comment.place)
                     span()
-                        = ". Place: "
+                        = ", in "
                     span(class='place')
                         = comment.place
                 span()
-                    = ". By "
+                    = ", with "
                 span(class='author')
                     = bool(comment.author) ? comment.author : i18n('comment-anonymous')
             span(class='note')
