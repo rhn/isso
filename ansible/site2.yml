@@ -1,0 +1,133 @@
+---
+
+- name: Deploy production server
+  hosts: marginalia
+  remote_user: deploy
+  tasks:
+    - name: Create user
+      user:
+        name: marginalia
+        system: yes
+      become: yes
+    - name: Adjust deploy
+      user:
+        name: deploy
+        groups: marginalia
+        append: yes
+      become: yes
+    - name: Marginalia directory
+      file: path=/srv/marginalia state=directory mode=0755 owner=deploy group=marginalia
+      become: yes
+    - name: Marginalia data
+      file: path=/srv/marginalia/data state=directory owner=deploy mode=0770 group=marginalia
+      become: yes
+    - name: rsync
+      yum: name=rsync state=present
+      become: yes
+    - name: copy isso
+      synchronize:
+        dest: /home/deploy/marginalia/
+        src: ./../../dist/
+      notify:
+        - Install marginalia
+      # do `python3 setup.py sdist` first
+    - name: deps
+      yum: name=gcc state=present
+      become: yes
+    - name: nginx
+      yum: name=nginx state=present
+      become: yes
+    - name: add nginx to marginalia
+      user:
+        name: nginx
+        groups: marginalia
+        append: yes
+      become: yes
+    - name: uwsgi
+      yum: name=uwsgi-plugin-python3 state=present
+      become: yes
+    - name: venv bin
+      yum: name=python34-virtualenv state=present
+      become: yes
+    - name: Spool | Create directory
+      file: path=/var/spool/marginalia state=directory mode=0775 group=marginalia
+      become: yes
+    - name: uwsgi
+      file: path=/run/marginalia state=directory mode=0770 owner=marginalia group=nginx
+      become: yes
+      notify:
+        - Set up socket policy
+    - name: uwsgi | Deploy configuration
+      copy: src=files/uwsgi2.ini dest=/srv/marginalia/etc/uwsgi.ini
+    - name: Deploy nginx config
+      copy: src=files/nginx2.vhost.conf dest=/etc/nginx/conf.d/marginalia.conf
+      become: yes
+      notify:
+        - Restart nginx
+    - name: Deploy configuration
+      copy: src=files/issoconf.ini dest=/srv/marginalia/etc/marginalia.ini
+    - name: Copy static files
+      synchronize:
+        src: ./../../isso/{{ item.name }}
+        dest: /srv/marginalia/html/
+        delete: yes
+      with_items:
+        - { name: css }
+        - { name: js }
+    - name: Copy content generator
+      synchronize:
+        src: ./../../marginalia/
+        dest: /home/deploy/marginalia/marginalia/
+        delete: yes
+      notify:
+        - Update contents
+    - name: Copy raw contents
+      synchronize:
+        src: ./site/
+        dest: /home/deploy/marginalia/contents
+        delete: yes
+      notify:
+        - Update contents
+    - name: Update content config
+      template:
+        src: ./config.yaml
+        dest: /home/deploy/marginalia/contents/config.yaml
+      notify:
+        - Update contents
+  handlers:
+    - name: Install marginalia
+      pip:
+        name: file:///home/deploy/marginalia/Marginalia-0.1.tar.gz
+        virtualenv: /srv/marginalia/env/
+        virtualenv_command: virtualenv-3
+        state: forcereinstall
+    - name: Set up socket policy
+    # policycoreutils-python
+      command: /usr/sbin/semanage fcontext -a -t httpd_var_run_t "/run/marginalia/(.*)?"
+    - name: Restart nginx
+      service: name=nginx state=reloaded
+      become: yes
+    - name: Install content gen deps
+      pip:
+        requirements: /home/deploy/marginalia/marginalia/requirements.txt
+        virtualenv: /srv/marginalia/env/
+        virtualenv_command: virtualenv-3
+        state: present
+      listen:
+        - Update contents
+    - name: Update content data
+      command: "/srv/marginalia/env/bin/python3 /home/deploy/marginalia/marginalia/gensite.py /home/deploy/marginalia/contents"
+      args:
+        chdir: /srv/marginalia/html
+      listen:
+        - Update contents
+    - name: Chown database
+      file:
+        path: /srv/marginalia/data/comments.db
+        state: file
+        owner: marginalia
+        group: marginalia
+        mode: "ug=rw"
+      become: yes
+      listen:
+        - Update contents
