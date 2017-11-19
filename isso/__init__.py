@@ -28,7 +28,7 @@
 from __future__ import print_function, unicode_literals
 
 import pkg_resources
-dist = pkg_resources.get_distribution("isso")
+dist = pkg_resources.get_distribution("Marginalia")
 
 # check if exectuable is `isso` and gevent is available
 import sys
@@ -72,6 +72,7 @@ from isso.utils import http, JSONRequest, html, hash
 from isso.views import comments
 
 from isso.ext.notifications import Stdout, SMTP
+from isso.db import schema
 
 logging.getLogger('werkzeug').setLevel(logging.WARN)
 logging.basicConfig(
@@ -86,6 +87,8 @@ class Isso(object):
     def __init__(self, conf):
 
         self.conf = conf
+        with schema.session(self.conf.get('general', 'dbpath')) as session:
+            pass # initialize by using
         self.db = db.SQLite3(conf.get('general', 'dbpath'), conf)
         self.signer = URLSafeTimedSerializer(self.db.preferences.get("session-key"))
         self.markup = html.Markup(conf.section('markup'))
@@ -195,7 +198,6 @@ def make_app(conf=None, threading=True, multiprocessing=False, uwsgi=False):
 
 
 def main():
-
     parser = ArgumentParser(description="a blog comment hosting service")
     subparser = parser.add_subparsers(help="commands", dest="command")
 
@@ -216,7 +218,7 @@ def main():
     subparser.add_parser("run", help="run server")
 
     args = parser.parse_args()
-    conf = config.load(join(dist.location, dist.project_name, "defaults.ini"), args.conf)
+    conf = config.load(join(dist.location, 'isso', "defaults.ini"), args.conf)
 
     if args.command == "import":
         conf.set("guard", "enabled", "off")
@@ -240,6 +242,8 @@ def main():
 
         logger.propagate = False
         logging.getLogger("werkzeug").propagate = False
+
+    logger.info("Logging started")
 
     if not any(conf.getiter("general", "host")):
         logger.error("No website(s) configured, Isso won't work.")

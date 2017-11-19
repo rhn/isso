@@ -53,9 +53,6 @@
 .isso-comment > div.text-wrapper > .isso-comment-header, .isso-comment > div.text-wrapper > .isso-comment-footer {
     font-size: 0.95em;
 }
-.isso-comment > div.text-wrapper > .isso-comment-header {
-    font-size: 0.85em;
-}
 .isso-comment > div.text-wrapper > .isso-comment-header .spacer {
     padding: 0 6px;
 }

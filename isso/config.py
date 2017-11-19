@@ -149,7 +149,7 @@ def load(default, user=None):
             logger.info("Your `session-key` has been stored in the "
                         "database itself, this option is now unused")
 
-    if not parseaddr(parser.get("smtp", "from"))[0]:
+    if not parseaddr(parser.get("smtp", "from", fallback=None))[0]:
         parser.set("smtp", "from",
                    formataddr(("Ich schrei sonst!", parser.get("smtp", "from"))))
 
