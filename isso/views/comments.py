@@ -704,11 +704,19 @@ class API(object):
             else:
                 return comments
 
+        from isso.db import schema
+        with schema.session(self.isso.conf.get('general', 'dbpath')) as session:
+            date_added = session.query(schema.Thread) \
+                                .filter(schema.Thread.uri == uri) \
+                                .one() \
+                                .date_added
+
         rv = {
             'id'             : root_id,
             'total_replies'  : reply_counts[root_id], # direct replies!
             'hidden_replies' : reply_counts[root_id] - len(root_list),
             'replies'        : list(self._process_fetched_list(do_sort(root_list), plain))
+            'date_added'     : date_added.isoformat()
         }
 
 

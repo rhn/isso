@@ -1,5 +1,6 @@
 # -*- encoding: utf-8 -*-
 
+from . import schema
 
 def Thread(id, uri, title, *args):
     return {
@@ -12,11 +13,7 @@ def Thread(id, uri, title, *args):
 class Threads(object):
 
     def __init__(self, db):
-
         self.db = db
-        self.db.execute([
-            'CREATE TABLE IF NOT EXISTS threads (',
-            '    id INTEGER PRIMARY KEY, uri VARCHAR(256) UNIQUE, title VARCHAR(256))'])
 
     def __contains__(self, uri):
         return self.db.execute("SELECT title FROM threads WHERE uri=?", (uri, )) \
