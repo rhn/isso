@@ -6,7 +6,7 @@
   <article>
     <h1><a href="/{{ book_path }}/{{ journal.slug }}/">Book #{{ journal.number }}: {{ meta.title }}</a></h1>
     <aside>
-      <p>With Marginalia since {{ meta.date }}, with the number #{{ journal.number }}.</p>
+      <p>With Marginalia since {{ meta.date }}, under the number #{{ journal.number }}.</p>
       {% if meta.donor is defined %}
           <p>Generously donated by {{ meta.donor }}.</p>
       {% else %}
@@ -37,6 +37,7 @@
               data-isso-thread="true"
               data-isso-bookcode="true"
               data-isso-readonly="true"
+              marginalia-uri="{{ journal.slug }}"
               data-isso-threads-root="//{{ site_url }}/{{ book_path}}/"
               data-isso-codes-root="//{{ site_url }}/{{ post_path }}/"
               src="//{{ script_url }}/js/components/requirejs/require.js">

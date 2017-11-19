@@ -9,6 +9,7 @@ import random
 random.seed()
 import string
 from datetime import date, datetime
+import shutil
 
 import CommonMark
 import yaml
@@ -19,8 +20,24 @@ from jinja2 import Environment, FileSystemLoader, StrictUndefined
 from sqlalchemy import Column, DateTime, String, Integer, ForeignKey, Date
 from sqlalchemy.orm import relationship, backref
 from sqlalchemy.ext.declarative import declarative_base
- 
- 
+
+
+# Python 3.4 compat
+def read_text(path):
+    with path.open() as f:
+        return f.read()
+
+def write_text(path, contents):
+    with path.open('w') as f:
+        f.write(contents)
+
+def mkdir(path, exist_ok):
+    try:
+        return path.mkdir()
+    except FileExistsError:
+        if not exist_ok:
+            raise
+
 Base = declarative_base()
 # TODO: move to core
 # TODO: migration with alembic
@@ -83,7 +100,7 @@ def parse_content(text):
 def make_page(config, env, text, template_filename):
     """take doc name and derive from there"""
     template = env.get_template(template_filename)
-    meta, content = parse_content(text.read_text())
+    meta, content = parse_content(read_text(text))
     return template.render(ChainMap({'meta': meta,
                                      'content': content},
                                     config))
@@ -92,7 +109,7 @@ def make_page(config, env, text, template_filename):
 def update_entry(config, book_slug, book_path):
     """Check if book exists, and add to database"""
     contents_path = book_path.joinpath("index.md")
-    meta, content = parse_content(contents_path.read_text())
+    meta, content = parse_content(read_text(contents_path))
 
     with open_db(config["db_path"]) as session:
         thread = session.query(Thread).filter(Thread.uri == book_slug).one_or_none()
@@ -135,17 +152,22 @@ def generate(srcpath, dstpath):
             os.makedirs(os.path.join(dstroot, dirname), exist_ok=True)
 
         for fname in files:
-            name = os.path.splitext(fname)[0]
-            templ_name = name + '.html'
-            page = make_page(config, env, Path(root, fname), templ_name)
-            if templ_name == "index.html":
-                dest_name = templ_name
-            else:
-                os.makedirs(os.path.join(dstroot, name), exist_ok=True)
-                dest_name = os.path.join(name, 'index.html')
-            with open(os.path.join(dstroot, dest_name), 'w') as f:
-                f.write(page)
+            srcfile = Path(root).joinpath(fname)
+            destfile = Path(dstroot).joinpath(srcfile.name)
+            shutil.copy(srcfile.as_posix(), destfile.as_posix())
+            if srcfile.suffix == '.md':
+                name = srcfile.stem
+                templ_name = name + '.html'
+                page = make_page(config, env, srcfile, templ_name)
+                if templ_name == "index.html":
+                    dest_name = templ_name
+                else:
+                    os.makedirs(os.path.join(dstroot, name), exist_ok=True)
+                    dest_name = os.path.join(name, 'index.html')
+                with open(os.path.join(dstroot, dest_name), 'w') as f:
+                    f.write(page)
 
+    mkdir(Path(dstroot, config["book_path"]), exist_ok=True)
 
     for d in Path(books).iterdir():
         if not d.is_dir():
@@ -154,23 +176,23 @@ def generate(srcpath, dstpath):
 
         name_slug = d.name
         dstdir = Path(dstroot, config["book_path"], name_slug)
-        dstdir.mkdir(exist_ok=True)
+        mkdir(dstdir, exist_ok=True)
 
         meta = update_entry(config, name_slug, d)
 
         postdir = Path(dstroot, config["post_path"], meta['code'])
-        postdir.parent.mkdir(exist_ok=True)
-        postdir.mkdir(exist_ok=True)
+        mkdir(postdir.parent, exist_ok=True)
+        mkdir(postdir, exist_ok=True)
 
         book_config = ChainMap({"journal": meta}, config)
         
         for fpath in d.iterdir():
             name = fpath.stem
             page = make_page(book_config, env, fpath, 'journal.html')
-            dstdir.joinpath(name + '.html').write_text(page)
-            
+            write_text(dstdir.joinpath(name + '.html'), page)
+
             page = make_page(book_config, env, fpath, 'journal_post.html')
-            postdir.joinpath(name + '.html').write_text(page)
+            write_text(postdir.joinpath(name + '.html'), page)
 
 
 if __name__ == '__main__':
