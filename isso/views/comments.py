@@ -715,7 +715,7 @@ class API(object):
             'id'             : root_id,
             'total_replies'  : reply_counts[root_id], # direct replies!
             'hidden_replies' : reply_counts[root_id] - len(root_list),
-            'replies'        : list(self._process_fetched_list(do_sort(root_list), plain))
+            'replies'        : list(self._process_fetched_list(do_sort(root_list), plain)),
             'date_added'     : date_added.isoformat()
         }
 

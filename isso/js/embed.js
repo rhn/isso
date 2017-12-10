@@ -45,7 +45,7 @@ require(["app/lib/ready", "app/config", "app/i18n", "app/api", "app/isso", "app/
                 var lastcreated = 0;
                 var count = rv.replies.length;
                 rv.replies.forEach(function(comment) {
-                    isso.insert(comment, false, rv.date_added);
+                    isso.insert(comment, false, new Date(rv.date_added));
                     if(comment.created > lastcreated) {
                         lastcreated = comment.created;
                     }

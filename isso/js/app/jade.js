@@ -54,6 +54,17 @@ define(["libjs-jade-runtime", "app/utils", "jade!app/text/postbox", "jade!app/te
         return date.toDateString();
     });
 
+    set("days_rel", function(end_date, start_date) {
+        if (typeof start_date !== "object") {
+            start_date = new Date(parseInt(start_date, 10) * 1000);
+        }
+        if (typeof end_date !== "object") {
+            end_date = new Date(parseInt(end_date, 10) * 1000);
+        }
+        var oneDay = 24*60*60*1000;
+        return Math.round(Math.abs((end_date.getTime() - start_date.getTime())/(oneDay)));
+    });
+
     set("today", function() {
         return (new Date()).toDateString();
     });

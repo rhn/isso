@@ -12,7 +12,7 @@ div(class='isso-comment #{bool(comment.parent) ? "entry" : "reply"}' id='isso-#{
                     = "On "
                 a(class='permalink' href='#{thread_uri}/#isso-#{comment.id}')
                     time(title='#{humanize(comment.created)}' datetime='#{datetime(comment.created)}')
-                        = days_rel(comment.created, thread_added)
+                        = "Day " + days_rel(comment.created, thread_added)
                 if bool(comment.place)
                     span()
                         = ", in "
