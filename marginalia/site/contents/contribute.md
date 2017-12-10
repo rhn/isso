@@ -31,11 +31,11 @@ Help with the site
 
 Digital contributions are welcome. Translations, bug fixes, features, apps — you name it.
 
-The code can be found at [the git repository](FIXME).
+The code can be found at [the git repository](https://github.com/rhn/marginalia).
 
 ### Bugs
 
 If you found a problem, Tell us at once!
 
-File [an issue](FIXME), or send an email straight to [*The Librarian*](mailto:librarian__at__porcupinefactory__dot__org)
+File [an issue](https://github.com/rhn/marginalia), or send an email straight to [*The Librarian*](mailto:librarian__at__porcupinefactory__dot__org)
 
