@@ -64,7 +64,7 @@
     - name: uwsgi | Deploy configuration
       copy: src=files/uwsgi2.ini dest=/srv/marginalia/etc/uwsgi.ini
     - name: Deploy nginx config
-      copy: src=files/nginx2.vhost.conf dest=/etc/nginx/conf.d/marginalia.conf
+      template: src=files/nginx2.vhost.conf dest=/etc/nginx/conf.d/marginalia.conf
       become: yes
       notify:
         - Restart nginx
