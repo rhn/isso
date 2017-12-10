@@ -49,7 +49,7 @@ define(["app/dom", "app/utils", "app/config", "app/api", "app/jade", "app/i18n",
             api.create($("#isso-thread").getAttribute("data-isso-id"), params).then(function(comment) {
                 $(".textarea", el).innerHTML = "";
                 $(".textarea", el).blur();
-                insert(comment, true);
+                insert(comment, true, new Date());
 
                 if (parent !== null) {
                     el.onsuccess();
@@ -176,8 +176,7 @@ define(["app/dom", "app/utils", "app/config", "app/api", "app/jade", "app/i18n",
             entrypoint = $("#isso-" + comment.parent + " > .text-wrapper > .isso-follow-up");
         }
 
-        entrypoint.prepend(el);
-
+        entrypoint.append(el);
 
         var footer = $("#isso-" + comment.id + " > .text-wrapper > .isso-comment-footer"),
             header = $("#isso-" + comment.id + " > .text-wrapper > .isso-comment-header"),
