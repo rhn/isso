@@ -1,0 +1,15 @@
+[Unit]
+Description=Marginalia uwsgi
+After=syslog.target
+
+[Service]
+ExecStart=/usr/sbin/uwsgi --ini /srv/marginalia/etc/uwsgi.ini
+ExecReload=/bin/kill -HUP $MAINPID
+KillSignal=SIGINT
+Restart=always
+Type=notify
+StandardError=syslog
+NotifyAccess=all
+
+[Install]
+WantedBy=multi-user.target

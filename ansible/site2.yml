@@ -21,6 +21,10 @@
     - name: Marginalia data
       file: path=/srv/marginalia/data state=directory owner=deploy mode=0770 group=marginalia
       become: yes
+    - name: Marginalia config
+      file: path=/srv/marginalia/etc state=directory owner=deploy mode=0750 group=marginalia
+      become: yes
+
     - name: rsync
       yum: name=rsync state=present
       become: yes
@@ -65,7 +69,7 @@
       notify:
         - Restart nginx
     - name: Deploy configuration
-      copy: src=files/issoconf.ini dest=/srv/marginalia/etc/marginalia.ini
+      template: src=files/issoconf.ini.j2 dest=/srv/marginalia/etc/marginalia.ini
     - name: Copy static files
       synchronize:
         src: ./../../isso/{{ item.name }}
@@ -74,6 +78,7 @@
       with_items:
         - { name: css }
         - { name: js }
+      notify: Set html policy
     - name: Copy content generator
       synchronize:
         src: ./../../marginalia/
@@ -94,6 +99,14 @@
         dest: /home/deploy/marginalia/contents/config.yaml
       notify:
         - Update contents
+    - name: copy service
+      template: src=files/marginalia.service dest=/etc/systemd/system
+      become: yes
+      notify:
+        - Restart marginalia
+    - name: run nginx
+      service: name=nginx state=started
+      become: yes
   handlers:
     - name: Install marginalia
       pip:
@@ -104,6 +117,7 @@
     - name: Set up socket policy
     # policycoreutils-python
       command: /usr/sbin/semanage fcontext -a -t httpd_var_run_t "/run/marginalia/(.*)?"
+      become: yes
     - name: Restart nginx
       service: name=nginx state=reloaded
       become: yes
@@ -131,3 +145,12 @@
       become: yes
       listen:
         - Update contents
+    - name: Set html policy
+      command: /usr/sbin/semanage fcontext -a -t httpd_sys_content_t "/srv/marginalia/html/(.*)?"
+      become: yes
+    - name: Set html context
+      command: /usr/sbin/restorecon -R /srv/marginalia
+      become: yes
+    - name: Restart marginalia
+      systemd: daemon-reload=yes name=marginalia state=restarted
+      become: yes
