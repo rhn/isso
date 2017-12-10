@@ -1,0 +1,6 @@
+script_url: "{{ sript_url|default(inventory_hostname) }}"
+api_url: "{{ api_url|default(inventory_hostname + "/api") }}"
+site_url: "{{ site_url|default(inventory_hostname) }}"
+book_path: "{{ book_path }}"
+post_path: "{{ post_path }}"
+db_path: "{{ db_path }}"
