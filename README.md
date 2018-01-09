@@ -11,6 +11,14 @@ Installation
 
 See Isso's documentation :)
 
+Site generation
+---------------
+
+1. Create a virtualenv for isso
+2. Activate it
+3. `cd ansible/data/`
+4. `python3 marginalia/gensite.py ansible/site`
+
 API
 ---
 

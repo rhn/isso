@@ -116,7 +116,7 @@
         state: forcereinstall
     - name: Set up socket policy
     # policycoreutils-python
-      command: /usr/sbin/semanage fcontext -a -t httpd_var_run_t "/run/marginalia/(.*)?"
+      command: /usr/sbin/semanage fcontext -a -t httpd_var_run_t "/var  /run/marginalia/(.*)?"
       become: yes
     - name: Restart nginx
       service: name=nginx state=reloaded
