@@ -1,5 +1,4 @@
 ---
-
 - name: Deploy production server
   hosts: marginalia
   remote_user: deploy
@@ -34,6 +33,8 @@
         src: ./../../dist/
       notify:
         - Install marginalia
+    - name: Setup scratch space
+      file: path=/home/deploy/marginalia/bookplates state=directory
       # do `python3 setup.py sdist` first
     - name: deps
       yum: name=gcc state=present
@@ -88,7 +89,7 @@
         - Update contents
     - name: Copy raw contents
       synchronize:
-        src: ./site/
+        src: ../../site/
         dest: /home/deploy/marginalia/contents
         delete: yes
       notify:
@@ -143,6 +144,14 @@
         group: marginalia
         mode: "ug=rw"
       become: yes
+      listen:
+        - Update contents
+    - name: Generate qrcodes
+      command: "/srv/marginalia/env/bin/python3 /home/deploy/marginalia/marginalia/genlabel.py /home/deploy/marginalia/contents /home/deploy/marginalia/bookplates/"
+      listen:
+        - Update contents
+    - name: Fetch codes
+      synchronize: src=/home/deploy/marginalia/bookplates/ dest=../../bookplates/{{ ansible_host }}/ mode=pull
       listen:
         - Update contents
     - name: Set html policy

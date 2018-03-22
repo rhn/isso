@@ -187,6 +187,8 @@ def generate(srcpath, dstpath):
         book_config = ChainMap({"journal": meta}, config)
         
         for fpath in d.iterdir():
+            if fpath.suffix != '.md':
+                continue
             name = fpath.stem
             page = make_page(book_config, env, fpath, 'journal.html')
             write_text(dstdir.joinpath(name + '.html'), page)

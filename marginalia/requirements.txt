@@ -2,3 +2,5 @@ CommonMark
 PyYAML
 Jinja2
 sqlalchemy
+qrcode
+pillow
