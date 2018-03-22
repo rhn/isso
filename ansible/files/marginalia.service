@@ -1,6 +1,6 @@
 [Unit]
 Description=Marginalia uwsgi
-After=syslog.target
+After=network.target
 
 [Service]
 ExecStart=/usr/sbin/uwsgi --ini /srv/marginalia/etc/uwsgi.ini

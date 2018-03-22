@@ -862,7 +862,8 @@ class API(object):
             return max(comment['created'] for comment in comments)
 
         threads = list(self._threads.get_all())
-        sorted_threads = list(sorted(((thread_freshness(t), t) for t in threads)))
+        sorted_threads = list(sorted(((thread_freshness(t), t) for t in threads),
+                                     key=lambda x: x[0]))
         return JSON({"threads": [{
                                     "uri": thread["uri"],
                                     "title": thread["title"],

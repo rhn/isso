@@ -62,7 +62,6 @@ class Access(Base):
 def open_db(path):
     from sqlalchemy import create_engine
     engine = create_engine('sqlite:///{}'.format(path))
-     
     from sqlalchemy.orm import sessionmaker
     session = sessionmaker()
     session.configure(bind=engine)
@@ -188,6 +187,7 @@ def generate(srcpath, dstpath):
         
         for fpath in d.iterdir():
             if fpath.suffix != '.md':
+                print("Skipping file with unknown suffix: {}".format(fpath))
                 continue
             name = fpath.stem
             page = make_page(book_config, env, fpath, 'journal.html')
