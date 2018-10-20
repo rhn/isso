@@ -1,0 +1,52 @@
+---
+- name: Prepare host for hosting
+  hosts: marginalia
+  remote_user: deploy
+  tasks:
+#    - name: Disable password ssh login
+#    - name: Enable autoupdates
+    - name: install epel
+      yum: name=epel-release state=present
+      become: yes
+    - name: install nginx
+      yum: name=nginx state=present
+      become: yes
+    - name: configure nginx
+      copy: src=./nginx.conf dest=/etc/nginx/nginx.conf
+      become: yes
+      notify:
+        - reload Nginx
+        - update firewall
+        - reload firewalld
+    - name: default directory
+      file: path=/srv/nothing state=directory mode=0755 owner=root group=root
+      become: yes
+    - name: Set up blank file
+      file: path=/srv/nothing/index.html state=touch mode=0755 owner=root group=root
+      become: yes
+      notify:
+        - Set html policy
+        - Set html context
+    - name: set up policy changers
+      yum: name=policycoreutils-python state=present
+      become: yes
+    - name: run nginx
+      service: name=nginx state=started
+      become: yes
+  handlers:
+    - name: Set html policy
+      command: /usr/sbin/semanage fcontext -a -t httpd_sys_content_t "/srv/nothing/(.*)?"
+      become: yes
+    - name: Set html context
+      command: /usr/sbin/restorecon -R /srv/nothing
+      become: yes
+    - name: reload Nginx
+      service: name=nginx enabled=yes state=reloaded
+      become: yes
+    - name: update firewall
+      firewalld: service=http permanent=true state=enabled
+      become: yes
+    - name: reload firewalld
+      service: name=firewalld state=reloaded
+      become: yes
+# TODO: enable ssl

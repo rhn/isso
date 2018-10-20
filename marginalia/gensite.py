@@ -11,7 +11,7 @@ import string
 from datetime import date, datetime
 import shutil
 
-import CommonMark
+import commonmark
 import yaml
 
 from jinja2 import Template
@@ -92,7 +92,7 @@ def split_content(text):
 def parse_content(text):
     meta_str, content_str = split_content(text)
     meta = None if meta_str is None else yaml.load(meta_str)
-    content_html = CommonMark.commonmark(content_str)
+    content_html = commonmark.commonmark(content_str)
     return meta, content_html
 
 

@@ -49,10 +49,10 @@
         append: yes
       become: yes
     - name: uwsgi
-      yum: name=uwsgi-plugin-python3 state=present
+      yum: name=uwsgi-plugin-python36 state=present
       become: yes
     - name: venv bin
-      yum: name=python34-virtualenv state=present
+      copy: src=files/virtualenv-3 dest=/usr/local/bin mode=ugo+x
       become: yes
     - name: Spool | Create directory
       file: path=/var/spool/marginalia state=directory mode=0775 group=marginalia
