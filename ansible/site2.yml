@@ -30,7 +30,7 @@
     - name: copy isso
       synchronize:
         dest: /home/deploy/marginalia/
-        src: ./../../dist/
+        src: "{{ host_dist_path }}"
       notify:
         - Install marginalia
     - name: Setup scratch space
@@ -114,7 +114,7 @@
   handlers:
     - name: Install marginalia
       pip:
-        name: file:///home/deploy/marginalia/Marginalia-0.1.tar.gz
+        name: file:///home/deploy/marginalia/sdist/Marginalia-0.1.tar.gz
         virtualenv: /srv/marginalia/env/
         virtualenv_command: virtualenv-3
         state: forcereinstall
