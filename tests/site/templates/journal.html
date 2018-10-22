@@ -1,0 +1,65 @@
+{% extends "page.html" %}
+{% block title %}
+    Journal of {{ meta.title }}
+{% endblock title %}
+{% block main %}
+  <article>
+    <h1><a href="/{{ book_path }}/{{ journal.slug }}/">Book #{{ journal.number }}: {{ meta.title }}</a></h1>
+    <p><span class="author">{{ meta.author }}</span>, <span class="year">{{ meta.year_written }}</span></p>
+    <aside>
+      <h2 class="title">
+        {% if meta.actual_title is defined %}
+            {{ meta.actual_title }}
+        {% else %}
+            {{ meta.title }}
+        {% endif %}
+      </h2>
+      {% if meta.type is not defined or meta.type != "internal" %}
+          <p>
+            Published in <span class="year_edition">{{ meta.year_edition }}</span>
+            <br />
+            ISBN: <span class="ISBN">{{ meta.ISBN }}</span>
+          </p>
+      {% endif %}
+      <p>
+          With Marginalia since {{ meta.date }}, under the number #{{ journal.number }}.
+          <br>
+          {% if meta.donor is defined %}
+              Generously donated by <span class="donor">{{ meta.donor }}</span>.
+          {% else %}
+              Donated anonymously.
+          {% endif %}
+      </p>
+    </aside>
+    <section>
+      {% for photo in journal.photos %}
+        <figure>
+            <img src="{{ photo.url }}" alt="{{ photo.name }}" />
+            <figcaption>{{ photo.name }}</figcaption>
+        </figure>
+      {% endfor %}
+    </section>
+    <section>
+        {% autoescape false %}
+          {{ content }}
+        {% endautoescape %}
+    </section>
+  </article>
+  <script src="//{{ script_url }}/js/config.js"></script>
+  {% block isso_init %}
+      <script data-main="//{{ script_url }}/js/embed"
+              data-isso="//{{ api_url }}/"
+              data-isso-max-comments-nested="10"
+              data-isso-avatar="false"
+              data-isso-vote="false"
+              data-isso-thread="true"
+              data-isso-bookcode="true"
+              data-isso-readonly="true"
+              marginalia-uri="{{ journal.slug }}"
+              data-isso-threads-root="//{{ site_url }}/{{ book_path}}/"
+              data-isso-codes-root="//{{ site_url }}/{{ post_path }}/"
+              src="//{{ script_url }}/js/components/requirejs/require.js">
+      </script>
+  {% endblock isso_init %}
+  <div id="isso-thread"></div>
+{% endblock main %}

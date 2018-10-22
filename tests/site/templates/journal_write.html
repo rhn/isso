@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+  <head>
+    <title>Journal of {{ book.title }}}</title>
+    <link rel="stylesheet" href="/marginalia.css">
+  </head>
+  <body>
+    {% include "nav.html" %}
+    <main>
+      <article>
+        <h1>Book #{{ book.number }}: {{ book.title }}</h1>
+        <section>
+          Photos go here
+        </section>
+        <section>
+          <p>This book put me in touch with my inner self.</p>
+        </section>
+        <aside>
+          <p>It joined Marginalia on 2017-10-12, with the number #{{ book.number }}.</p>
+          <p>Generously donated by Flourence.</p>
+        </aside>
+      </article>
+      <script src="//127.0.0.1:8080/js/config.js"></script>
+      <script data-main="//127.0.0.1:8080/js/embed"
+              data-isso="//127.0.0.1:8080/"
+              data-isso-max-comments-nested="10"
+              data-isso-avatar="false"
+              data-isso-vote="false"
+              marginalia-uri="/"
+              marginalia-post-key="MhrHxcuuj6z+Ew"
+              src="//127.0.0.1:8080/js/components/requirejs/require.js">
+      </script>
+      <div id="isso-thread"></div>
+    </main>
+  </body>
+</html>

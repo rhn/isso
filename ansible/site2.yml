@@ -48,6 +48,9 @@
         groups: marginalia
         append: yes
       become: yes
+    - name: pytjon-devel
+      yum: name=python36-devel state=present
+      become: yes
     - name: uwsgi
       yum: name=uwsgi-plugin-python36 state=present
       become: yes
@@ -87,9 +90,9 @@
         delete: yes
       notify:
         - Update contents
-    - name: Copy raw contents
+    - name: Copy site contents
       synchronize:
-        src: ../../site/
+        src: "{{ host_site_path }}"
         dest: /home/deploy/marginalia/contents
         delete: yes
       notify:
@@ -151,7 +154,7 @@
       listen:
         - Update contents
     - name: Fetch codes
-      synchronize: src=/home/deploy/marginalia/bookplates/ dest=../../bookplates/{{ ansible_host }}/ mode=pull
+      synchronize: src=/home/deploy/marginalia/bookplates/ dest={{ host_bookplates_path }}/{{ ansible_host }}/ mode=pull
       listen:
         - Update contents
     - name: Set html policy

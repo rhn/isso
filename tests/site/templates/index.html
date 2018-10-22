@@ -1,0 +1,22 @@
+{% extends "page.html" %}
+{% block main %}
+  <div id="isso-code"></div>
+  <article>
+    {% autoescape false %}
+      {{ content }}
+    {% endautoescape %}
+  </article>
+  <script src="//{{ script_url }}/js/config.js"></script>
+  <script data-main="//{{ script_url }}/js/embed"
+        data-isso="//{{ api_url }}/"
+        data-isso-overview="true"
+        data-isso-bookcode="true"
+        data-isso-codes-root="//{{ site_url }}/{{ post_path }}/"
+        src="//{{ script_url }}/js/components/requirejs/require.js">
+  </script>
+  <section id="library">
+    <h2>Journals</h2>
+    <p>Recent discussion first<p>
+    <ul id="isso-overview"></ul>
+  </section>
+{% endblock %}

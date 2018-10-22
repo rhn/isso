@@ -1,0 +1,16 @@
+{% extends "page.html" %}
+{% block main %}
+      <aside id="isso-code"></aside>
+      <article>
+        {% autoescape false %}
+          {{ content }}
+        {% endautoescape %}
+      </article>
+      <script src="//{{ script_url }}/js/config.js"></script>
+      <script data-main="//{{ script_url }}/js/embed"
+            data-isso="//{{ api_url }}/"
+            data-isso-bookcode="true"
+            data-isso-codes-root="//{{ site_url }}/bookcodes/"
+            src="//{{ script_url }}/js/components/requirejs/require.js">
+      </script>
+{% endblock main %}

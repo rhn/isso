@@ -29,6 +29,8 @@ Fill in variables in the inventory for each host:
 - `book_path`: part of URL after `site_url` where books will be found
 - `post_path`: part of URL after `site_url` where book codes will be found
 - `db_path`: database site (generator only)
+- `host_site_path`: path to unprocessed site contents
+- `host_bookplates_path`: path to place generated bookplate codes
 
 Installation and updating
 -------------------------

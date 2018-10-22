@@ -9,7 +9,29 @@ Marginalia is based on [Isso](http://posativ.org/isso/).
 Installation
 ------------
 
-See Isso's documentation :)
+See the test suite.
+
+Testing
+-------
+
+To test, install vagrant and ansible. The test host will be created from scratch, with a new key every time, so put the following in your `~/.ssh/config`. **DO NOT USE THIS FOR PRODUCTION HOSTS**.
+
+```
+Host 192.168.121.140
+  StrictHostKeyChecking no
+```
+
+Run tests with:
+
+```
+python3 ./tests/test.py
+```
+
+The tests will create a fresh virtual machine. You can also start a fresh testing VM yourself by running:
+
+```
+python3 ./tests/manhole.py
+```
 
 Site generation
 ---------------
