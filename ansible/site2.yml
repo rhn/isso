@@ -48,7 +48,7 @@
         groups: marginalia
         append: yes
       become: yes
-    - name: pytjon-devel
+    - name: python-devel
       yum: name=python36-devel state=present
       become: yes
     - name: uwsgi
@@ -160,6 +160,7 @@
     - name: Set html policy
       command: /usr/sbin/semanage fcontext -a -t httpd_sys_content_t "/srv/marginalia/html/(.*)?"
       become: yes
+      notify: Set html context
     - name: Set html context
       command: /usr/sbin/restorecon -R /srv/marginalia
       become: yes
