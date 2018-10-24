@@ -28,8 +28,14 @@ def test_html_static(ctx):
     # FIXME: add test to use dummy site and compare content
 
 def test_api(ctx):
-    resp = urllib.request.urlopen('http://{addr}/api/'.format(addr=ctx['vm_addr']))
-    assert_eq(resp.status, 400)
+    try:
+        urllib.request.urlopen('http://{addr}/api/'.format(addr=ctx['vm_addr']))
+    except HttpError as e:
+        assert_eq(e.code, 400)
+    except Error as e:
+        raise TestError("Unexpected error {}".format(e))
+    else:
+        raise TestError("No error")
 
 @contextmanager
 def vm_ctx(ctx):
@@ -74,6 +80,8 @@ def get_test_context(repo_path):
         yield {'tempdir': Path(d),
                'repo_path': repo_path}
 
+
+"""Ctxmgr is a context manager within which all tests in the suite will get executed"""
 Suite = namedtuple('Suite', ['ctxmgr', 'tests'])
 
 suites = (Suite(standard_ctx, [test_sdist]),
@@ -88,6 +96,7 @@ def find_tests(suites, name):
         found_tests = find_suite_tests(tests, name)
         if found_tests:
             yield Suite(setup_mgr, found_tests)
+
 
 if __name__ == '__main__':
     import argparse
