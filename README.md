@@ -6,15 +6,10 @@ you have to obtain the physical copy of the book to post.
 
 Marginalia is based on [Isso](http://posativ.org/isso/).
 
-Installation
-------------
-
-See the test suite.
-
 Testing
 -------
 
-To test, install vagrant and ansible. The test host will be created from scratch, with a new key every time, so put the following in your `~/.ssh/config`. **DO NOT USE THIS FOR PRODUCTION HOSTS**.
+To test, generate a SSH key, then install vagrant and ansible. The test host will be created from scratch, with a new key every time, so put the following in your `~/.ssh/config`. **DO NOT USE THIS FOR PRODUCTION HOSTS**.
 
 ```
 Host 192.168.121.140
@@ -38,13 +33,38 @@ Site generation
 
 1. Create a virtualenv for isso
 2. Activate it
-3. `cd ansible/data/`
-4. `python3 marginalia/gensite.py ansible/site`
+3. `python3 marginalia/gensite.py ansible/site`
+
+Tutorial
+--------
+
+### Prepare
+
+Run tests first.
+
+### Create basic site
+
+Use site template from tests.
+
+Copy `ansible/config.yaml` somewhere. **FIXME**
+
+Run the site generator. **FIXME**
+
+### Install marginalia
+
+Prepare the target machine 
+
+Adjust `ansible_inventory.ini`.
+
+Production installation
+-----------------------
+
+See the test suite.
 
 API
 ---
 
-Marginalia introduces:
+Marginalia introduces over isso API:
 
 - access keys found inside books
 - uri-independent thread IDs

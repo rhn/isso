@@ -104,7 +104,7 @@ if __name__ == '__main__':
     parser.add_argument('match', nargs='?', help='match test name')
     args = parser.parse_args()
     if args.match:
-        suites = find_tests(tests, args.match)
+        suites = find_tests(suites, args.match)
     for setup_mgr, tests in suites:
         with get_test_context(REPO_PATH) as ctx:
             with setup_mgr(ctx) as ctx:

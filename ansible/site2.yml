@@ -99,7 +99,7 @@
         - Update contents
     - name: Update content config
       template:
-        src: ./config.yaml
+        src: "{{ host_site_path }}/config.yaml"
         dest: /home/deploy/marginalia/contents/config.yaml
       notify:
         - Update contents
