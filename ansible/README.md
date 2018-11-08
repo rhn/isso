@@ -14,11 +14,12 @@ Create a directory to store generated bookplate codes:
 mkdir ../../bookplates
 ```
 
-Use the `fresh.yml` playbook to set up the deploy user, and the `hosting` playbook to set up dependencies.
+Use the `fresh.yml` playbook to set up the deploy user, the `hosting` playbook to set up dependencies, and the `users` playbook to set up users.
 
 ```
 ansible-playbook -i inventory.ini ./fresh.yml
 ansible-playbook -i inventory.ini ./hosting.yml
+ansible-playbook -i inventory.ini ./users.yml
 ```
 
 Fill in variables in the inventory for each host:
@@ -28,9 +29,10 @@ Fill in variables in the inventory for each host:
 - `site_url`: base URL for the site and static elements. Deault: `inventory_hostname`
 - `book_path`: part of URL after `site_url` where books will be found
 - `post_path`: part of URL after `site_url` where book codes will be found
-- `db_path`: database site (generator only)
+- `db_path`: database path
 - `host_site_path`: path to unprocessed site contents
-- `host_bookplates_path`: path to place generated bookplate codes
+- `host_bookcodes_path`: path to place generated bookplate codes (must exist)
+- `host_dist_path`: path where the Marginalia source tarball can be found
 
 Installation and updating
 -------------------------

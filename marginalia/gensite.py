@@ -169,7 +169,7 @@ def generate(srcpath, dstpath):
                 with open(os.path.join(dstroot, dest_name), 'w') as f:
                     f.write(page)
 
-    mkdir(Path(dstroot, config["book_path"]), exist_ok=True)
+    mkdir(Path(dstpath, config["book_path"]), exist_ok=True)
 
     for d in Path(books).iterdir():
         if not d.is_dir():
@@ -177,12 +177,12 @@ def generate(srcpath, dstpath):
             continue
 
         name_slug = d.name
-        dstdir = Path(dstroot, config["book_path"], name_slug)
+        dstdir = Path(dstpath, config["book_path"], name_slug)
         mkdir(dstdir, exist_ok=True)
 
         meta = update_entry(config, name_slug, d)
 
-        postdir = Path(dstroot, config["post_path"], meta['code'])
+        postdir = Path(dstpath, config["post_path"], meta['code'])
         mkdir(postdir.parent, exist_ok=True)
         mkdir(postdir, exist_ok=True)
 
@@ -202,7 +202,7 @@ def generate(srcpath, dstpath):
 
 if __name__ == '__main__':
     import argparse
-    parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser(description="Generate Marginalia sites")
     parser.add_argument("sourcepath")
     args = parser.parse_args()
     generate(args.sourcepath, '.')

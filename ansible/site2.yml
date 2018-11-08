@@ -3,17 +3,6 @@
   hosts: marginalia
   remote_user: deploy
   tasks:
-    - name: Create user
-      user:
-        name: marginalia
-        system: yes
-      become: yes
-    - name: Adjust deploy
-      user:
-        name: deploy
-        groups: marginalia
-        append: yes
-      become: yes
     - name: Marginalia directory
       file: path=/srv/marginalia state=directory mode=0755 owner=deploy group=marginalia
       become: yes
@@ -23,7 +12,6 @@
     - name: Marginalia config
       file: path=/srv/marginalia/etc state=directory owner=deploy mode=0750 group=marginalia
       become: yes
-
     - name: rsync
       yum: name=rsync state=present
       become: yes
@@ -34,7 +22,7 @@
       notify:
         - Install marginalia
     - name: Setup scratch space
-      file: path=/home/deploy/marginalia/bookplates state=directory
+      file: path=/home/deploy/marginalia/bookcodes state=directory
       # do `python3 setup.py sdist` first
     - name: deps
       yum: name=gcc state=present
@@ -92,14 +80,14 @@
         - Update contents
     - name: Copy site contents
       synchronize:
-        src: "{{ host_site_path }}"
-        dest: /home/deploy/marginalia/contents
+        src: "{{ host_site_path }}/"
+        dest: /home/deploy/marginalia/contents/
         delete: yes
       notify:
         - Update contents
     - name: Update content config
       template:
-        src: "{{ host_site_path }}/config.yaml"
+        src: "{{ host_site_path }}/config.yaml.ansible"
         dest: /home/deploy/marginalia/contents/config.yaml
       notify:
         - Update contents
@@ -133,28 +121,28 @@
         state: present
       listen:
         - Update contents
-    - name: Update content data
-      command: "/srv/marginalia/env/bin/python3 /home/deploy/marginalia/marginalia/gensite.py /home/deploy/marginalia/contents"
-      args:
-        chdir: /srv/marginalia/html
-      listen:
-        - Update contents
     - name: Chown database
       file:
         path: /srv/marginalia/data/comments.db
-        state: file
+        state: touch
         owner: marginalia
         group: marginalia
         mode: "ug=rw"
       become: yes
       listen:
         - Update contents
+    - name: Update content data
+      command: "/srv/marginalia/env/bin/python3 /home/deploy/marginalia/marginalia/gensite.py /home/deploy/marginalia/contents"
+      args:
+        chdir: /srv/marginalia/html
+      listen:
+        - Update contents
     - name: Generate qrcodes
-      command: "/srv/marginalia/env/bin/python3 /home/deploy/marginalia/marginalia/genlabel.py /home/deploy/marginalia/contents /home/deploy/marginalia/bookplates/"
+      command: "/srv/marginalia/env/bin/python3 /home/deploy/marginalia/marginalia/genlabel.py /home/deploy/marginalia/contents /home/deploy/marginalia/bookcodes/"
       listen:
         - Update contents
     - name: Fetch codes
-      synchronize: src=/home/deploy/marginalia/bookplates/ dest={{ host_bookplates_path }}/{{ ansible_host }}/ mode=pull
+      synchronize: src=/home/deploy/marginalia/bookcodes/ dest={{ host_bookcodes_path }}/{{ ansible_host }}/ mode=pull
       listen:
         - Update contents
     - name: Set html policy

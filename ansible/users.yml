@@ -1,0 +1,18 @@
+---
+- name: Adjust users
+  hosts: marginalia
+  remote_user: deploy
+  tasks:
+    - name: Create user
+      user:
+        name: marginalia
+        system: yes
+      become: yes
+    - name: Adjust deploy
+      user:
+        name: deploy
+        groups: marginalia
+        append: yes
+      become: yes
+    - name: Reset connection 
+      meta: reset_connection # the group membership of deploy has just been changed, this makes sure it takes effect
