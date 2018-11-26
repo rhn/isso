@@ -126,7 +126,7 @@ def update_entry(config, book_slug, book_path):
             session.add(access)
             print("Key for {} is {}".format(thread.title, access.key))
         session.commit()    
-        
+        # FIXME: add photos
         return {"number": access.id,
                 "code": access.key,
                 "slug": book_slug,
