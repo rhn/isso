@@ -42,6 +42,9 @@
     - name: uwsgi
       yum: name=uwsgi-plugin-python36 state=present
       become: yes
+    - name: setuptools # FIXME no idea why it insists on Python2 version of setuptoold...
+      yum: name=python-setuptools state=present
+      become: yes
     - name: venv bin
       copy: src=files/virtualenv-3 dest=/usr/local/bin mode=ugo+x
       become: yes
