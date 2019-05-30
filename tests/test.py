@@ -3,6 +3,7 @@ from pathlib import Path
 import subprocess
 from contextlib import contextmanager
 from tempfile import TemporaryDirectory
+from urllib.error import HTTPError
 import urllib.request
 from collections import namedtuple
 import shutil
@@ -20,7 +21,7 @@ def assert_file(path):
     if not path.is_file():
         raise TestError("{} is not a file".format(path))
 
-def assert_eq(ctx, a, b):
+def assert_eq(a, b):
     if not a == b:
         raise TestError("{!r} is not equal to {!r}".format(a, b))
 
@@ -56,11 +57,12 @@ def test_install(ctx):
     with open(ctx['repo_path'].joinpath('tests/ansible_inventory.ini')) as inv:
         inv_contents = inv.read()
     inv_path = ctx['tempdir'].joinpath('ansible_inventory.ini')
+    bookcodes_path = ctx['tempdir'].joinpath('bookcodes')
     with open(inv_path, 'w') as inv:
         inv.write(inv_contents.format(
             dist_path=ctx['tempdir'].joinpath('sdist'),
-            bookcodes_path=ctx['tempdir'].joinpath('bookcodes')))
-
+            bookcodes_path=bookcodes_path))
+    lib.try_mkdir(bookcodes_path)
     try:
         vagrant('up', cwd=ctx['repo_path'].joinpath('tests')) # may leave an unprovisioned VM
         ansible('ansible/fresh.yml', inv_path, cwd=ctx['repo_path'])
@@ -104,7 +106,7 @@ def test_html_static(ctx):
 def test_api(ctx):
     try:
         urllib.request.urlopen('http://{addr}/api/'.format(addr=ctx['vm_addr']))
-    except HttpError as e:
+    except HTTPError as e:
         assert_eq(e.code, 400)
     except Error as e:
         raise TestError("Unexpected error {}".format(e))
@@ -153,10 +155,10 @@ def test_vm_add_book(ctx):
         post_codes = read_codes(bookcodes_path.joinpath(ctx['vm_addr']))
         new_entries = set(post_codes.keys()) - set(pre_codes.keys())
 
-        assert_eq(ctx, len(new_entries), 1)
+        assert_eq(len(new_entries), 1)
         
         post_codes.pop(new_entries.pop())
-        assert_eq(ctx, pre_codes, post_codes)
+        assert_eq(pre_codes, post_codes)
 
 
 @contextmanager
@@ -254,22 +256,41 @@ def test_add_book(ctx):
 
 
 """Ctxmgr is a context manager within which all tests in the suite will get executed"""
-Suite = namedtuple('Suite', ['ctxmgr', 'tests'])
+Suite = namedtuple('Suite', ['name', 'ctxmgr', 'tests'])
 
-suites = (Suite(standard_ctx, [test_lib_replace]),
-          Suite(standard_ctx, [test_sdist]),
-          Suite(sdist_ctx, [test_install]),
-          Suite(vm_ctx, (test_html_static, test_api, test_vm_add_book)),
-          Suite(ctx_gen_venv, [test_gen_html, test_gen_code, test_add_book]))
+suites = (Suite("", standard_ctx, [test_lib_replace]),
+          Suite("", standard_ctx, [test_sdist]),
+          Suite("install", sdist_ctx, [test_install]),
+          Suite("vm", vm_ctx, (test_html_static, test_api, test_vm_add_book)),
+          Suite("venv", ctx_gen_venv, [test_gen_html, test_gen_code, test_add_book]))
 
-def find_tests(suites, name):
+def find_tests(suites, match):
     def find_suite_tests(tests, name):
         return [test for test in tests if test.__name__ == name]
 
-    for setup_mgr, tests in suites:
-        found_tests = find_suite_tests(tests, name)
-        if found_tests:
-            yield Suite(setup_mgr, found_tests)
+    for name, setup_mgr, tests in suites:
+        if match not in name:
+            tests = find_suite_tests(tests, name)
+        if tests:
+            yield Suite(name, setup_mgr, tests)
+
+
+def perform_tests(suites):
+    for suite_name, setup_mgr, tests in suites:
+        print("Starting suite", suite_name)
+        with get_test_context(REPO_PATH) as ctx:
+            with setup_mgr(ctx) as ctx:
+                for test in tests:
+                    print("running", suite_name, test.__name__)
+                    try:
+                        test(ctx)
+                    except Exception as e:
+                        traceback.print_exc(e)
+                        result = 'fail'
+                    else:
+                        result = 'pass'
+                    finally:
+                        yield suite_name, test.__name__, result
 
 
 if __name__ == '__main__':
@@ -279,8 +300,6 @@ if __name__ == '__main__':
     args = parser.parse_args()
     if args.match:
         suites = find_tests(suites, args.match)
-    for setup_mgr, tests in suites:
-        with get_test_context(REPO_PATH) as ctx:
-            with setup_mgr(ctx) as ctx:
-                for test in tests:
-                    test(ctx)
+    results = list(perform_tests(suites))
+    for suite, test, result in results:
+        print(suite, test, result)

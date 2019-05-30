@@ -22,7 +22,9 @@ Run tests with:
 python3 ./tests/test.py
 ```
 
-The tests will create a fresh virtual machine. You can also start a fresh testing VM yourself by running:
+For reasons yet unknown, the ansible jobs may fail a couple of times.
+
+You can also start a fresh testing VM with Marginalia installed by running:
 
 ```
 python3 ./tests/manhole.py
