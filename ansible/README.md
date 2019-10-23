@@ -34,6 +34,19 @@ Fill in variables in the inventory for each host:
 - `host_bookcodes_path`: path to place generated bookplate codes (must exist)
 - `host_dist_path`: path where the Marginalia source tarball can be found
 
+Testing your site
+-----------------
+
+```
+cd isso
+python3 ./setup.py sdist
+python3 ./tests/manhole.py
+cd ansible
+ansible-playbook -i ../tests/ansible_inventory_manual.ini ./site2.yml
+```
+
+TODO: run the generator separately
+
 Installation and updating
 -------------------------
 
@@ -42,4 +55,12 @@ cd isso
 python3 ./setup.py sdist
 cd ansible
 ansible-playbook -i inventory.ini ./site2.yml
+```
+
+Backups
+-------
+
+```
+scp -r deploy@host:/srv/marginalia/data .
+scp -r deploy@host:/srv/marginalia/html .
 ```

@@ -28,6 +28,7 @@ You can also start a fresh testing VM with Marginalia installed by running:
 
 ```
 python3 ./tests/manhole.py
+ssh deploy@192.168.121.140
 ```
 
 Site generation
@@ -61,7 +62,7 @@ Adjust `ansible_inventory.ini`.
 Production installation
 -----------------------
 
-See the test suite.
+See `ansible/README.md` for explanation, `tests/` for an example.
 
 API
 ---

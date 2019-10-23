@@ -285,7 +285,8 @@ def perform_tests(suites):
                     try:
                         test(ctx)
                     except Exception as e:
-                        traceback.print_exc(e)
+                        import traceback
+                        traceback.print_exc()
                         result = 'fail'
                     else:
                         result = 'pass'

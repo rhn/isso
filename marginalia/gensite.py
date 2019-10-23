@@ -94,7 +94,7 @@ def split_content(text):
 
 def parse_content(text):
     meta_str, content_str = split_content(text)
-    meta = None if meta_str is None else yaml.load(meta_str)
+    meta = None if meta_str is None else yaml.safe_load(meta_str)
     content_html = commonmark(content_str)
     return meta, content_html
 
@@ -141,7 +141,7 @@ def generate(srcpath, dstpath):
         extensions=['jinja2.ext.autoescape'],
         undefined=StrictUndefined
     )
-    config = yaml.load(open(os.path.join(srcpath, 'config.yaml')).read())
+    config = yaml.safe_load(open(os.path.join(srcpath, 'config.yaml')).read())
     contents = os.path.join(srcpath, 'contents')
     templates = os.path.join(srcpath, 'templates')
     books = os.path.join(srcpath, 'books')
